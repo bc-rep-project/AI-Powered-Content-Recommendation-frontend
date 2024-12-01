@@ -7,36 +7,62 @@ import {
   Button,
   Badge,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
 import { FiThumbsUp, FiEye } from 'react-icons/fi';
+import { useState } from 'react';
 import { recordInteraction } from '../services/api';
-
-interface Recommendation {
-  content_id: string;
-  title: string;
-  description: string;
-  score: number;
-  image_url?: string;
-}
+import { Recommendation } from '../types';
+import LoadingSpinner from './LoadingSpinner';
 
 interface RecommendationListProps {
   recommendations: Recommendation[];
 }
 
 export default function RecommendationList({ recommendations }: RecommendationListProps) {
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const toast = useToast();
+  
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   const handleInteraction = async (contentId: string, type: 'view' | 'like') => {
+    setLoadingStates(prev => ({ ...prev, [contentId]: true }));
+    
     try {
       await recordInteraction({
         content_id: contentId,
         interaction_type: type,
       });
+      
+      toast({
+        title: 'Success',
+        description: `${type === 'view' ? 'Viewed' : 'Liked'} content successfully`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to record interaction. Please try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
       console.error('Error recording interaction:', error);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, [contentId]: false }));
     }
   };
+
+  if (recommendations.length === 0) {
+    return (
+      <Box textAlign="center" py={10}>
+        <Text color="gray.500">No recommendations available yet.</Text>
+      </Box>
+    );
+  }
 
   return (
     <VStack spacing={4} align="stretch">
@@ -49,7 +75,25 @@ export default function RecommendationList({ recommendations }: RecommendationLi
           border="1px"
           borderColor={borderColor}
           _hover={{ shadow: 'md' }}
+          position="relative"
         >
+          {loadingStates[rec.content_id] && (
+            <Box
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              bg="blackAlpha.200"
+              borderRadius="md"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <LoadingSpinner message="Recording interaction..." />
+            </Box>
+          )}
+          
           <HStack spacing={4}>
             {rec.image_url && (
               <Image
@@ -75,6 +119,7 @@ export default function RecommendationList({ recommendations }: RecommendationLi
                   size="sm"
                   leftIcon={<FiEye />}
                   onClick={() => handleInteraction(rec.content_id, 'view')}
+                  isLoading={loadingStates[rec.content_id]}
                 >
                   View
                 </Button>
@@ -83,6 +128,7 @@ export default function RecommendationList({ recommendations }: RecommendationLi
                   leftIcon={<FiThumbsUp />}
                   variant="outline"
                   onClick={() => handleInteraction(rec.content_id, 'like')}
+                  isLoading={loadingStates[rec.content_id]}
                 >
                   Like
                 </Button>

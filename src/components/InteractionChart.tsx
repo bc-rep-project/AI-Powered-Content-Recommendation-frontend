@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   LineChart,
   Line,
@@ -11,23 +11,45 @@ import {
 } from 'recharts';
 import { Box, useColorModeValue } from '@chakra-ui/react';
 import { fetchInteractionHistory } from '../services/api';
+import { useAsync } from '../hooks/useAsync';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorAlert from './ErrorAlert';
+import type { InteractionData } from '../types';
 
 export default function InteractionChart() {
-  const [data, setData] = useState([]);
+  const {
+    data,
+    error,
+    isLoading,
+    execute,
+  } = useAsync<InteractionData[]>();
+
   const lineColor = useColorModeValue('brand.600', 'brand.200');
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const history = await fetchInteractionHistory();
-        setData(history);
-      } catch (error) {
-        console.error('Error loading interaction history:', error);
-      }
-    };
+    execute(fetchInteractionHistory);
+  }, [execute]);
 
-    loadData();
-  }, []);
+  if (isLoading) {
+    return <LoadingSpinner message="Loading interaction history..." />;
+  }
+
+  if (error) {
+    return (
+      <ErrorAlert
+        title="Error Loading Chart"
+        message="Failed to load interaction history. Please try again later."
+      />
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <Box textAlign="center" py={10}>
+        No interaction data available yet.
+      </Box>
+    );
+  }
 
   return (
     <Box h="300px">
