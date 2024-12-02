@@ -5,7 +5,7 @@ import {
   SimpleGrid,
   Input,
   InputGroup,
-  InputLeftIcon,
+  InputLeftElement,
   Select,
   Stack,
   useColorModeValue,
@@ -44,7 +44,9 @@ export default function DiscoverPage() {
         <Stack spacing={4} mb={8}>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
             <InputGroup>
-              <InputLeftIcon pointerEvents="none" children={<FiSearch />} />
+              <InputLeftElement pointerEvents="none">
+                <FiSearch />
+              </InputLeftElement>
               <Input
                 placeholder="Search content..."
                 value={searchQuery}
