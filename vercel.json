@@ -7,12 +7,23 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://your-backend-url.com"
+    "NEXT_PUBLIC_API_URL": "https://ai-content-recommendation.up.railway.app"
   },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://your-backend-url.com/api/:path*"
+      "source": "/api/v1/:path*",
+      "destination": "https://ai-content-recommendation.up.railway.app/api/v1/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" }
+      ]
     }
   ]
 } 

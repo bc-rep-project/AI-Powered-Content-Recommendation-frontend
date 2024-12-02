@@ -10,11 +10,14 @@ import {
   UserSettings,
 } from '../types';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+
 export const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Add request interceptor to include auth token
@@ -43,7 +46,7 @@ export const login = async (
   email: string,
   password: string
 ): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/token', {
+  const response = await api.post<AuthResponse>('/api/v1/auth/token', {
     username: email,
     password,
   });
@@ -55,13 +58,13 @@ export const register = async (userData: {
   password: string;
   username: string;
 }): Promise<User> => {
-  const response = await api.post<User>('/auth/register', userData);
+  const response = await api.post<User>('/api/v1/auth/register', userData);
   return response.data;
 };
 
 // Recommendations
 export const fetchRecommendations = async (): Promise<Recommendation[]> => {
-  const response = await api.post<Recommendation[]>('/recommendations', {
+  const response = await api.post<Recommendation[]>('/api/v1/recommendations', {
     n_recommendations: 10,
   });
   return response.data;
