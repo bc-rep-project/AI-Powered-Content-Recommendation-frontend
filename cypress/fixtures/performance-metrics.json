@@ -1,0 +1,72 @@
+{
+  "metrics": {
+    "overall": {
+      "ctr": 0.18,
+      "engagementRate": 0.65,
+      "retentionScore": 0.72,
+      "trend": "improving"
+    },
+    "timeSeries": {
+      "daily": [
+        {
+          "date": "2023-08-01",
+          "ctr": 0.18,
+          "engagementRate": 0.65,
+          "retentionScore": 0.72
+        },
+        {
+          "date": "2023-07-31",
+          "ctr": 0.17,
+          "engagementRate": 0.63,
+          "retentionScore": 0.71
+        },
+        {
+          "date": "2023-07-30",
+          "ctr": 0.16,
+          "engagementRate": 0.62,
+          "retentionScore": 0.70
+        }
+      ],
+      "weekly": [
+        {
+          "week": "2023-W31",
+          "ctr": 0.17,
+          "engagementRate": 0.63,
+          "retentionScore": 0.71
+        },
+        {
+          "week": "2023-W30",
+          "ctr": 0.15,
+          "engagementRate": 0.60,
+          "retentionScore": 0.69
+        }
+      ]
+    },
+    "segments": {
+      "newUsers": {
+        "ctr": 0.16,
+        "engagementRate": 0.60,
+        "retentionScore": 0.65
+      },
+      "returningUsers": {
+        "ctr": 0.20,
+        "engagementRate": 0.70,
+        "retentionScore": 0.78
+      }
+    }
+  },
+  "insights": [
+    {
+      "type": "trend",
+      "metric": "ctr",
+      "message": "CTR improved by 12% over last week",
+      "significance": "high"
+    },
+    {
+      "type": "segment",
+      "metric": "engagement",
+      "message": "Returning users show 16% higher engagement",
+      "significance": "medium"
+    }
+  ]
+} 

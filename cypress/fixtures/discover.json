@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "id": "1",
+      "title": "Trending in AI",
+      "description": "Latest developments in artificial intelligence",
+      "category": "Technology",
+      "trending": true,
+      "views": 1500
+    },
+    {
+      "id": "2",
+      "title": "Deep Learning Applications",
+      "description": "Practical applications of deep learning",
+      "category": "Education",
+      "trending": true,
+      "views": 1200
+    },
+    {
+      "id": "3",
+      "title": "Neural Networks Explained",
+      "description": "Understanding neural networks",
+      "category": "Education",
+      "trending": false,
+      "views": 800
+    }
+  ],
+  "categories": [
+    "Technology",
+    "Education",
+    "Science",
+    "Business"
+  ]
+} 

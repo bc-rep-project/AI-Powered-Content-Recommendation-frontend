@@ -1,0 +1,33 @@
+{
+  "interactions": [
+    {
+      "id": "1",
+      "type": "view",
+      "itemId": "1",
+      "itemTitle": "Machine Learning Basics",
+      "timestamp": "2023-08-01T14:30:00Z"
+    },
+    {
+      "id": "2",
+      "type": "like",
+      "itemId": "2",
+      "itemTitle": "Data Science Projects",
+      "timestamp": "2023-08-01T14:35:00Z"
+    },
+    {
+      "id": "3",
+      "type": "save",
+      "itemId": "3",
+      "itemTitle": "AI Ethics",
+      "timestamp": "2023-08-01T14:40:00Z"
+    }
+  ],
+  "statistics": {
+    "totalViews": 150,
+    "totalLikes": 45,
+    "totalSaves": 20,
+    "averageTimeSpent": "5m 30s",
+    "mostViewedCategory": "Technology",
+    "mostLikedCategory": "Education"
+  }
+} 

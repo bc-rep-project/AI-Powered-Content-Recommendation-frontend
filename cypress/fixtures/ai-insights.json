@@ -1,0 +1,67 @@
+{
+  "insights": {
+    "contentCategory": {
+      "primary": "Technical",
+      "secondary": ["Education", "AI/ML"],
+      "confidence": 0.95
+    },
+    "sentiment": {
+      "overall": "neutral",
+      "score": 0.6,
+      "breakdown": {
+        "positive": 0.65,
+        "neutral": 0.30,
+        "negative": 0.05
+      }
+    },
+    "topics": [
+      {
+        "name": "Deep Learning",
+        "relevance": 0.9,
+        "mentions": 15
+      },
+      {
+        "name": "Neural Networks",
+        "relevance": 0.85,
+        "mentions": 12
+      },
+      {
+        "name": "AI Applications",
+        "relevance": 0.75,
+        "mentions": 8
+      }
+    ],
+    "readability": {
+      "score": 0.82,
+      "level": "Advanced",
+      "metrics": {
+        "fleschKincaid": 12.5,
+        "sentenceComplexity": "high",
+        "technicalTerms": 45
+      }
+    },
+    "contentStructure": {
+      "sections": 5,
+      "codeBlocks": 8,
+      "examples": 6,
+      "citations": 4
+    },
+    "recommendations": [
+      {
+        "type": "improvement",
+        "suggestion": "Add more practical examples",
+        "priority": "high"
+      },
+      {
+        "type": "enhancement",
+        "suggestion": "Include introductory section",
+        "priority": "medium"
+      }
+    ]
+  },
+  "metadata": {
+    "analyzedAt": "2023-08-01T12:00:00Z",
+    "modelVersion": "2.1.0",
+    "processingTime": "2.3s"
+  }
+} 

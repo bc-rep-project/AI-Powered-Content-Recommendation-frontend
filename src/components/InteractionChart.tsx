@@ -1,20 +1,35 @@
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import { Box, useColorModeValue } from '@chakra-ui/react';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import { Box, useColorModeValue } from '@chakra-ui/react';
+  ChartData,
+  ChartOptions
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import { fetchInteractionHistory } from '../services/api';
 import { useAsync } from '../hooks/useAsync';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorAlert from './ErrorAlert';
 import type { InteractionData } from '../types';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function InteractionChart() {
   const {
@@ -24,7 +39,7 @@ export default function InteractionChart() {
     execute,
   } = useAsync<InteractionData[]>();
 
-  const lineColor = useColorModeValue('brand.600', 'brand.200');
+  const lineColor = useColorModeValue('rgb(49, 130, 206)', 'rgb(144, 205, 244)');
 
   useEffect(() => {
     execute(fetchInteractionHistory);
@@ -51,31 +66,43 @@ export default function InteractionChart() {
     );
   }
 
+  const chartData: ChartData<'line'> = {
+    labels: data.map(item => item.date),
+    datasets: [
+      {
+        label: 'Interactions',
+        data: data.map(item => item.interactions),
+        fill: false,
+        borderColor: lineColor,
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const options: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: 'Interaction History',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+
   return (
-    <Box h="300px">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="interactions"
-            stroke={lineColor}
-            activeDot={{ r: 8 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <Box h="300px" w="100%" position="relative">
+      <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
+        <Line data={chartData} options={options} />
+      </div>
     </Box>
   );
 } 

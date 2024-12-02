@@ -1,0 +1,33 @@
+{
+  "alerts": [
+    {
+      "id": "alert-1",
+      "metric": "recommendation_ctr",
+      "threshold": 0.15,
+      "duration": 24,
+      "severity": "warning",
+      "notification": {
+        "email": true,
+        "slack": true
+      }
+    },
+    {
+      "id": "alert-2",
+      "metric": "model_accuracy",
+      "threshold": 0.85,
+      "duration": 12,
+      "severity": "critical",
+      "notification": {
+        "email": true,
+        "slack": true
+      }
+    }
+  ],
+  "globalConfig": {
+    "enabled": true,
+    "minThreshold": 0.01,
+    "maxThreshold": 1.0,
+    "minDuration": 1,
+    "maxDuration": 168
+  }
+} 

@@ -1,0 +1,64 @@
+{
+  "queue": [
+    {
+      "id": "1",
+      "title": "Introduction to Neural Networks",
+      "description": "Learn about neural network architectures and applications",
+      "type": "article",
+      "status": "pending",
+      "submittedAt": "2023-08-01T10:00:00Z",
+      "submittedBy": "content_creator",
+      "flags": [],
+      "metadata": {
+        "wordCount": 1500,
+        "readingTime": "7 minutes",
+        "complexity": "intermediate"
+      }
+    },
+    {
+      "id": "2",
+      "title": "Data Science Best Practices",
+      "description": "Guidelines for effective data science workflows",
+      "type": "tutorial",
+      "status": "pending",
+      "submittedAt": "2023-08-01T11:30:00Z",
+      "submittedBy": "expert_user",
+      "flags": [
+        {
+          "type": "quality",
+          "reason": "Needs technical review"
+        }
+      ],
+      "metadata": {
+        "wordCount": 2500,
+        "readingTime": "12 minutes",
+        "complexity": "advanced"
+      }
+    },
+    {
+      "id": "3",
+      "title": "Python Programming Tips",
+      "description": "Advanced Python programming techniques",
+      "type": "article",
+      "status": "pending",
+      "submittedAt": "2023-08-01T12:45:00Z",
+      "submittedBy": "tech_writer",
+      "flags": [
+        {
+          "type": "duplicate",
+          "reason": "Similar content exists"
+        }
+      ],
+      "metadata": {
+        "wordCount": 1800,
+        "readingTime": "9 minutes",
+        "complexity": "intermediate"
+      }
+    }
+  ],
+  "statistics": {
+    "totalPending": 3,
+    "averageWaitTime": "2h 15m",
+    "moderatorsOnline": 2
+  }
+} 

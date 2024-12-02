@@ -1,0 +1,31 @@
+{
+  "recommendations": [
+    {
+      "id": "1",
+      "title": "Machine Learning Basics",
+      "description": "Introduction to fundamental ML concepts",
+      "category": "Education",
+      "score": 0.95,
+      "liked": false,
+      "saved": false
+    },
+    {
+      "id": "2",
+      "title": "Data Science Projects",
+      "description": "Real-world data science applications",
+      "category": "Technology",
+      "score": 0.88,
+      "liked": true,
+      "saved": false
+    },
+    {
+      "id": "3",
+      "title": "AI Ethics",
+      "description": "Ethical considerations in AI development",
+      "category": "Technology",
+      "score": 0.85,
+      "liked": false,
+      "saved": true
+    }
+  ]
+} 

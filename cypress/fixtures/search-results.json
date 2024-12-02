@@ -1,0 +1,40 @@
+{
+  "results": [
+    {
+      "id": "1",
+      "title": "Machine Learning Basics",
+      "description": "Introduction to fundamental ML concepts",
+      "category": "Education",
+      "relevanceScore": 0.95,
+      "datePublished": "2023-07-25T10:00:00Z",
+      "rating": 4.8
+    },
+    {
+      "id": "4",
+      "title": "Advanced Machine Learning Techniques",
+      "description": "Deep dive into ML algorithms",
+      "category": "Technology",
+      "relevanceScore": 0.88,
+      "datePublished": "2023-07-26T14:00:00Z",
+      "rating": 4.6
+    },
+    {
+      "id": "5",
+      "title": "Machine Learning in Practice",
+      "description": "Real-world ML applications",
+      "category": "Technology",
+      "relevanceScore": 0.82,
+      "datePublished": "2023-07-27T09:00:00Z",
+      "rating": 4.5
+    }
+  ],
+  "metadata": {
+    "totalResults": 3,
+    "searchTerm": "machine learning",
+    "filters": {
+      "minRating": null,
+      "category": null,
+      "dateRange": null
+    }
+  }
+} 

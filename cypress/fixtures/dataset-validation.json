@@ -1,0 +1,90 @@
+{
+  "validation": {
+    "status": "completed",
+    "summary": {
+      "totalRecords": 10000,
+      "validRecords": 9850,
+      "invalidRecords": 150,
+      "overallScore": 0.985
+    },
+    "checks": {
+      "schema": {
+        "status": "passed",
+        "details": {
+          "missingColumns": [],
+          "wrongTypes": [],
+          "extraColumns": []
+        }
+      },
+      "constraints": {
+        "status": "warning",
+        "violations": [
+          {
+            "field": "rating",
+            "constraint": "range(1,5)",
+            "violations": 25,
+            "examples": [
+              {"id": "rec-123", "value": 6},
+              {"id": "rec-124", "value": 0}
+            ]
+          }
+        ]
+      },
+      "relationships": {
+        "status": "passed",
+        "details": {
+          "userExists": "100%",
+          "contentExists": "99.8%",
+          "validInteractions": "100%"
+        }
+      }
+    },
+    "dataProfile": {
+      "numerical": {
+        "rating": {
+          "mean": 3.8,
+          "std": 0.9,
+          "min": 0,
+          "max": 6,
+          "nulls": 0
+        },
+        "engagementTime": {
+          "mean": 245.6,
+          "std": 120.3,
+          "min": 0,
+          "max": 3600,
+          "nulls": 50
+        }
+      },
+      "categorical": {
+        "interactionType": {
+          "unique": 4,
+          "mostCommon": "view",
+          "leastCommon": "share",
+          "nulls": 20
+        }
+      },
+      "temporal": {
+        "timestamp": {
+          "earliest": "2023-01-01T00:00:00Z",
+          "latest": "2023-07-31T23:59:59Z",
+          "gaps": []
+        }
+      }
+    }
+  },
+  "recommendations": [
+    {
+      "type": "data_cleaning",
+      "priority": "high",
+      "description": "Fix out-of-range rating values",
+      "affectedRecords": 25
+    },
+    {
+      "type": "data_quality",
+      "priority": "medium",
+      "description": "Fill missing engagement times",
+      "affectedRecords": 50
+    }
+  ]
+} 

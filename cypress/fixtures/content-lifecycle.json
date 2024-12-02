@@ -1,0 +1,102 @@
+{
+  "lifecycle": {
+    "currentStage": "published",
+    "history": [
+      {
+        "stage": "draft",
+        "enteredAt": "2023-07-01T10:00:00Z",
+        "exitedAt": "2023-07-05T15:30:00Z",
+        "duration": "4d 5h 30m",
+        "actor": "content_creator"
+      },
+      {
+        "stage": "review",
+        "enteredAt": "2023-07-05T15:30:00Z",
+        "exitedAt": "2023-07-07T11:45:00Z",
+        "duration": "1d 20h 15m",
+        "actor": "content_reviewer"
+      },
+      {
+        "stage": "published",
+        "enteredAt": "2023-07-07T11:45:00Z",
+        "exitedAt": null,
+        "duration": "25d 0h 15m",
+        "actor": "content_manager"
+      }
+    ],
+    "performance": {
+      "views": {
+        "total": 1500,
+        "trend": "+15%",
+        "byStage": {
+          "draft": 0,
+          "review": 25,
+          "published": 1475
+        }
+      },
+      "engagement": {
+        "rate": 0.68,
+        "trend": "+5%",
+        "metrics": {
+          "completionRate": 0.75,
+          "averageTimeSpent": "8m 30s",
+          "interactionRate": 0.45
+        }
+      },
+      "feedback": {
+        "rating": 4.5,
+        "reviews": 45,
+        "sentiment": {
+          "positive": 0.85,
+          "neutral": 0.10,
+          "negative": 0.05
+        }
+      }
+    },
+    "health": {
+      "overall": 0.88,
+      "metrics": {
+        "freshness": 0.92,
+        "relevance": 0.85,
+        "quality": 0.87
+      },
+      "warnings": [
+        {
+          "type": "content_aging",
+          "severity": "low",
+          "message": "Content is 25 days old"
+        }
+      ]
+    },
+    "metadata": {
+      "version": "1.2",
+      "lastUpdated": "2023-07-20T14:30:00Z",
+      "scheduledReview": "2023-08-07T00:00:00Z",
+      "tags": ["machine-learning", "beginner"],
+      "category": "education",
+      "targetAudience": ["students", "developers"]
+    }
+  },
+  "actions": {
+    "available": [
+      {
+        "type": "update",
+        "requiredRole": "content_editor",
+        "description": "Update content"
+      },
+      {
+        "type": "archive",
+        "requiredRole": "content_manager",
+        "description": "Archive content"
+      }
+    ],
+    "recent": [
+      {
+        "type": "update",
+        "timestamp": "2023-07-20T14:30:00Z",
+        "actor": "content_editor",
+        "details": "Updated code examples"
+      }
+    ]
+  }
+} 

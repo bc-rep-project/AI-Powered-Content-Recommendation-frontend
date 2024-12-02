@@ -1,0 +1,53 @@
+{
+  "topics": [
+    {
+      "id": "1",
+      "name": "Artificial Intelligence",
+      "trendScore": 95,
+      "changeLastWeek": "+15%",
+      "relatedItems": [
+        {
+          "id": "1",
+          "title": "Machine Learning Basics",
+          "views": 1500
+        },
+        {
+          "id": "4",
+          "title": "Advanced Machine Learning Techniques",
+          "views": 1200
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Data Science",
+      "trendScore": 88,
+      "changeLastWeek": "+10%",
+      "relatedItems": [
+        {
+          "id": "2",
+          "title": "Data Science Projects",
+          "views": 1100
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "name": "Neural Networks",
+      "trendScore": 82,
+      "changeLastWeek": "+8%",
+      "relatedItems": [
+        {
+          "id": "5",
+          "title": "Deep Learning Applications",
+          "views": 950
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "timeframe": "Last 7 days",
+    "totalViews": 4750,
+    "uniqueUsers": 2500
+  }
+} 

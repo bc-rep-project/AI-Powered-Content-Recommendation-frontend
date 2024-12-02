@@ -1,0 +1,55 @@
+{
+  "status": {
+    "jobId": "train-123",
+    "state": "running",
+    "progress": {
+      "currentEpoch": 25,
+      "totalEpochs": 50,
+      "timeElapsed": "1h 15m",
+      "estimatedTimeRemaining": "1h 10m",
+      "metrics": {
+        "loss": 0.245,
+        "accuracy": 0.892,
+        "valLoss": 0.267,
+        "valAccuracy": 0.878
+      }
+    },
+    "history": [
+      {
+        "epoch": 23,
+        "loss": 0.252,
+        "accuracy": 0.888,
+        "valLoss": 0.271,
+        "valAccuracy": 0.875
+      },
+      {
+        "epoch": 24,
+        "loss": 0.248,
+        "accuracy": 0.890,
+        "valLoss": 0.269,
+        "valAccuracy": 0.876
+      },
+      {
+        "epoch": 25,
+        "loss": 0.245,
+        "accuracy": 0.892,
+        "valLoss": 0.267,
+        "valAccuracy": 0.878
+      }
+    ],
+    "resources": {
+      "gpuUtilization": 92,
+      "memoryUsage": 85,
+      "batchesProcessed": 750
+    }
+  },
+  "config": {
+    "datasetId": "dataset-123",
+    "epochs": 50,
+    "batchSize": 32,
+    "learningRate": 0.001,
+    "validationSplit": 0.2,
+    "optimizer": "adam",
+    "lossFunction": "categorical_crossentropy"
+  }
+} 

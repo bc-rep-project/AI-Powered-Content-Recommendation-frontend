@@ -1,0 +1,54 @@
+{
+  "history": [
+    {
+      "id": "incident-1",
+      "alertId": "alert-1",
+      "metric": "recommendation_ctr",
+      "value": 0.12,
+      "threshold": 0.15,
+      "status": "triggered",
+      "timestamp": "2023-08-01T10:00:00Z",
+      "resolvedAt": "2023-08-01T11:30:00Z",
+      "duration": "1h 30m",
+      "actions": [
+        {
+          "type": "notification",
+          "channel": "email",
+          "timestamp": "2023-08-01T10:00:00Z"
+        },
+        {
+          "type": "notification",
+          "channel": "slack",
+          "timestamp": "2023-08-01T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "incident-2",
+      "alertId": "alert-2",
+      "metric": "model_accuracy",
+      "value": 0.82,
+      "threshold": 0.85,
+      "status": "active",
+      "timestamp": "2023-08-01T12:00:00Z",
+      "resolvedAt": null,
+      "duration": "ongoing",
+      "actions": [
+        {
+          "type": "notification",
+          "channel": "email",
+          "timestamp": "2023-08-01T12:00:00Z"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "active": 1,
+    "resolved": 1,
+    "byMetric": {
+      "recommendation_ctr": 1,
+      "model_accuracy": 1
+    }
+  }
+} 
