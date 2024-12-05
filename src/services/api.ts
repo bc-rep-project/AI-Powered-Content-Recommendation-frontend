@@ -10,7 +10,7 @@ import {
   UserSettings,
 } from '../types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://diplomatic-heart-production.up.railway.app';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -46,7 +46,7 @@ export const login = async (
   email: string,
   password: string
 ): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/api/v1/auth/token', {
+  const response = await api.post<AuthResponse>('/token', {
     username: email,
     password,
   });

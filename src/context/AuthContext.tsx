@@ -38,7 +38,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
   const login = React.useCallback(async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const response = await api.post<AuthResponse>('/auth/token', {
+      const response = await api.post<AuthResponse>('/token', {
         username: email,
         password,
       });
