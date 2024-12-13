@@ -1,31 +1,54 @@
 import axios from 'axios';
-import { API_URL } from '../config/constants';
+import { API_BASE_URL } from '../config/api';
 
-const api = axios.create({
-    baseURL: API_URL,
+const apiClient = axios.create({
+    baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json'
-    }
+    },
+    withCredentials: true // Important for handling cookies/auth
 });
 
-export const getRecommendations = async (userId: string) => {
-    try {
-        const response = await api.get(`/recommendations/${userId}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching recommendations:', error);
-        throw error;
+// Add request interceptor for auth
+apiClient.interceptors.request.use((config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
-};
+    return config;
+});
 
-// Test connection
-const testApiConnection = async () => {
-    try {
-        const response = await api.get('/health');
-        console.log('API Connection successful:', response.data);
-        return true;
-    } catch (error) {
-        console.error('API Connection failed:', error);
-        return false;
+// Add response interceptor for token refresh
+apiClient.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        
+        if (error.response.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            
+            try {
+                // Try to refresh token
+                const refreshToken = localStorage.getItem('refresh_token');
+                const response = await apiClient.post('/auth/refresh', { refresh_token: refreshToken });
+                
+                const { access_token } = response.data;
+                localStorage.setItem('access_token', access_token);
+                
+                // Retry original request
+                originalRequest.headers.Authorization = `Bearer ${access_token}`;
+                return apiClient(originalRequest);
+            } catch (refreshError) {
+                // Handle refresh failure (logout user, redirect to login, etc.)
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.location.href = '/login';
+                return Promise.reject(refreshError);
+            }
+        }
+        
+        return Promise.reject(error);
     }
-}; 
+);
+
+export default apiClient; 

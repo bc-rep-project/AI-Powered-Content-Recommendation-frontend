@@ -1,7 +1,13 @@
 export interface User {
   id: string;
   email: string;
-  username: string;
+  name: string;
+  role: UserRole;
+}
+
+export enum UserRole {
+  USER = 'user',
+  ADMIN = 'admin'
 }
 
 export interface Recommendation {
@@ -27,12 +33,14 @@ export interface InteractionData {
 
 export interface AuthResponse {
   access_token: string;
-  token_type: string;
+  refresh_token: string;
+  user: User;
 }
 
 export interface ApiError {
-  detail: string;
-  status_code: number;
+  message: string;
+  code: string;
+  status: number;
 }
 
 export interface TrendingStats {

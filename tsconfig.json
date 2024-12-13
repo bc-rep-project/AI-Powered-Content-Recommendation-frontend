@@ -9,34 +9,33 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "incremental": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "incremental": true,
+    "types": [
+      "node",
+      "jest",
+      "@testing-library/jest-dom"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
-    "forceConsistentCasingInFileNames": true,
-    "types": ["react", "node"],
-    "typeRoots": ["./node_modules/@types"],
-    "jsxImportSource": "react"
+      "@/*": ["src/*"]
+    }
   },
   "include": [
     "next-env.d.ts",
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/types/*.d.ts"
+    "src/**/*.tsx"
   ],
   "exclude": [
     "node_modules",
     "cypress",
-    "cypress.config.ts"
+    "**/*.cy.ts"
   ]
 }

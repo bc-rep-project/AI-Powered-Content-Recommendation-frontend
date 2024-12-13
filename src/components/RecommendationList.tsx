@@ -10,27 +10,42 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FiThumbsUp, FiEye } from 'react-icons/fi';
-import { useState } from 'react';
-import { recordInteraction } from '../services/api';
+import { useState, useEffect } from 'react';
+import apiClient from '../services/api';
+import { API_ENDPOINTS } from '../config/api';
 import { Recommendation } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 
-interface RecommendationListProps {
-  recommendations: Recommendation[];
-}
-
-export default function RecommendationList({ recommendations }: RecommendationListProps) {
+export default function RecommendationList() {
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const toast = useToast();
   
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      try {
+        const response = await apiClient.get(API_ENDPOINTS.recommendations);
+        setRecommendations(response.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecommendations();
+  }, []);
+
   const handleInteraction = async (contentId: string, type: 'view' | 'like') => {
     setLoadingStates(prev => ({ ...prev, [contentId]: true }));
     
     try {
-      await recordInteraction({
+      await apiClient.post(API_ENDPOINTS.interactions, {
         content_id: contentId,
         interaction_type: type,
       });
