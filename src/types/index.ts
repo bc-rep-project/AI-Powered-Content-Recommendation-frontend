@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  username: string;
   role: UserRole;
 }
 
@@ -11,13 +12,13 @@ export enum UserRole {
 }
 
 export interface Recommendation {
-  content_id: string;
   title: string;
   description: string;
   score: number;
   image_url?: string;
-  metadata?: Record<string, any>;
   category?: string;
+  content_id: string;
+  metadata?: Record<string, any>;
 }
 
 export interface UserStats {
@@ -32,9 +33,9 @@ export interface InteractionData {
 }
 
 export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
   user: User;
+  token: string;
+  refreshToken?: string;
 }
 
 export interface ApiError {
@@ -73,4 +74,38 @@ export interface UserSettings {
   recommendationFrequency: string;
   contentPreferences: string[];
   language: string;
+}
+
+export interface RecommendationResponse {
+  id: number;
+  content_id: string;
+  title: string;
+  description: string;
+  score: number;
+  image_url?: string;
+  category?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface InteractionData {
+  timestamp: string;
+  interactionCount: number;
+}
+
+export interface ApiEndpoints {
+  recommendations: string;
+  interactions: string;
+  discover: string;
+  favorites: string;
+  collections: string;
+  auth: {
+    login: string;
+    register: string;
+    refresh: string;
+  };
+  user: {
+    profile: string;
+    stats: string;
+    settings: string;
+  };
 } 

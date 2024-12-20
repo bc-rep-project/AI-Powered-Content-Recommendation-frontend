@@ -10,45 +10,27 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FiThumbsUp, FiEye } from 'react-icons/fi';
-import { useState, useEffect } from 'react';
-import apiClient from '../services/api';
-import { API_ENDPOINTS } from '../config/api';
-import { Recommendation } from '../types';
+import { useState } from 'react';
+import { recommendationService } from '../services/api';
+import type { Recommendation } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 
-export default function RecommendationList() {
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+interface RecommendationListProps {
+  recommendations: Recommendation[];
+}
+
+const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations }) => {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const toast = useToast();
   
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
-  useEffect(() => {
-    const fetchRecommendations = async () => {
-      try {
-        const response = await apiClient.get(API_ENDPOINTS.recommendations);
-        setRecommendations(response.data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRecommendations();
-  }, []);
-
   const handleInteraction = async (contentId: string, type: 'view' | 'like') => {
     setLoadingStates(prev => ({ ...prev, [contentId]: true }));
     
     try {
-      await apiClient.post(API_ENDPOINTS.interactions, {
-        content_id: contentId,
-        interaction_type: type,
-      });
+      await recommendationService.trackInteraction(contentId, type);
       
       toast({
         title: 'Success',
@@ -154,4 +136,6 @@ export default function RecommendationList() {
       ))}
     </VStack>
   );
-} 
+};
+
+export default RecommendationList; 

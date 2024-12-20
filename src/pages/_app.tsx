@@ -1,30 +1,18 @@
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import { AppProps } from 'next/app';
+import React from 'react';
+import type { AppProps } from 'next/app';
+import { ChakraProvider } from '@chakra-ui/react';
 import { AuthProvider } from '../context/AuthContext';
-
-const theme = extendTheme({
-  config: {
-    initialColorMode: 'light',
-    useSystemColorMode: true,
-  },
-  colors: {
-    brand: {
-      50: '#f0f9ff',
-      100: '#e0f2fe',
-      500: '#0ea5e9',
-      600: '#0284c7',
-      700: '#0369a1',
-    },
-  },
-});
+import theme from '../theme';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return (
-    <ChakraProvider theme={theme}>
-      <AuthProvider>
-        <Component {...pageProps} />
-      </AuthProvider>
-    </ChakraProvider>
+  return React.createElement(
+    ChakraProvider,
+    { theme },
+    React.createElement(
+      AuthProvider,
+      null,
+      React.createElement(Component, pageProps)
+    )
   );
 }
 

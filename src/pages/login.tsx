@@ -56,9 +56,8 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSocialAuth = async (provider: 'google' | 'github' | 'facebook') => {
+  const handleSocialLogin = async (provider: 'google' | 'github' | 'facebook') => {
     try {
-      setSocialLoading(provider);
       switch (provider) {
         case 'google':
           await loginWithGoogle();
@@ -70,17 +69,14 @@ export default function LoginPage() {
           await loginWithFacebook();
           break;
       }
-      router.push('/dashboard');
     } catch (error) {
       toast({
-        title: `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed`,
-        description: error instanceof Error ? error.message : 'Please try again.',
+        title: 'Error',
+        description: `Failed to login with ${provider}. Please try again.`,
         status: 'error',
         duration: 5000,
         isClosable: true,
       });
-    } finally {
-      setSocialLoading(null);
     }
   };
 
@@ -129,7 +125,7 @@ export default function LoginPage() {
             w="100%"
             variant="outline"
             leftIcon={<Icon as={FcGoogle} boxSize={5} />}
-            onClick={() => handleSocialAuth('google')}
+            onClick={() => handleSocialLogin('google')}
             isLoading={socialLoading === 'google'}
           >
             Continue with Google
@@ -138,7 +134,7 @@ export default function LoginPage() {
             w="100%"
             variant="outline"
             leftIcon={<Icon as={FiGithub} boxSize={5} />}
-            onClick={() => handleSocialAuth('github')}
+            onClick={() => handleSocialLogin('github')}
             isLoading={socialLoading === 'github'}
           >
             Continue with GitHub
@@ -147,7 +143,7 @@ export default function LoginPage() {
             w="100%"
             variant="outline"
             leftIcon={<Icon as={FaFacebook} boxSize={5} color="facebook.500" />}
-            onClick={() => handleSocialAuth('facebook')}
+            onClick={() => handleSocialLogin('facebook')}
             isLoading={socialLoading === 'facebook'}
           >
             Continue with Facebook

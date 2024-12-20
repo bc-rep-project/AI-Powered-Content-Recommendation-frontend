@@ -1,108 +1,69 @@
-import { useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { Box, useColorModeValue } from '@chakra-ui/react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartData,
-  ChartOptions
-} from 'chart.js';
+import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import { fetchInteractionHistory } from '../services/api';
-import { useAsync } from '../hooks/useAsync';
-import LoadingSpinner from './LoadingSpinner';
-import ErrorAlert from './ErrorAlert';
+import { Chart as ChartJS } from 'chart.js/auto';
+import { recommendationService } from '../services/api';
 import type { InteractionData } from '../types';
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-export default function InteractionChart() {
-  const {
-    data,
-    error,
-    isLoading,
-    execute,
-  } = useAsync<InteractionData[]>();
-
-  const lineColor = useColorModeValue('rgb(49, 130, 206)', 'rgb(144, 205, 244)');
+const InteractionChart = () => {
+  const [data, setData] = useState<InteractionData[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    execute(fetchInteractionHistory);
-  }, [execute]);
+    const fetchData = async () => {
+      try {
+        const historyData = await recommendationService.fetchInteractionHistory();
+        setData(historyData);
+      } catch (err) {
+        setError('Failed to load interaction history');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (isLoading) {
-    return <LoadingSpinner message="Loading interaction history..." />;
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return (
-      <ErrorAlert
-        title="Error Loading Chart"
-        message="Failed to load interaction history. Please try again later."
-      />
-    );
+    return <div className="text-red-500">{error}</div>;
   }
 
-  if (!data || data.length === 0) {
-    return (
-      <Box textAlign="center" py={10}>
-        No interaction data available yet.
-      </Box>
-    );
-  }
-
-  const chartData: ChartData<'line'> = {
-    labels: data.map(item => item.date),
+  const chartData = {
+    labels: data.map(d => new Date(d.timestamp).toLocaleDateString()),
     datasets: [
       {
-        label: 'Interactions',
-        data: data.map(item => item.interactions),
+        label: 'User Interactions',
+        data: data.map(d => d.interactionCount),
         fill: false,
-        borderColor: lineColor,
-        tension: 0.1,
-      },
-    ],
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      }
+    ]
   };
 
-  const options: ChartOptions<'line'> = {
+  const options = {
     responsive: true,
-    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
       },
       title: {
         display: true,
-        text: 'Interaction History',
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
+        text: 'Recommendation Interactions Over Time'
+      }
+    }
   };
 
   return (
-    <Box h="300px" w="100%" position="relative">
-      <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
-        <Line data={chartData} options={options} />
-      </div>
-    </Box>
+    <div className="w-full h-[400px] p-4">
+      <Line data={chartData} options={options} />
+    </div>
   );
-} 
+};
+
+export default InteractionChart; 

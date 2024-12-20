@@ -54,7 +54,7 @@ export default function Navbar() {
 
           <Menu>
             <MenuButton as={Button} rightIcon={<FiUser />} variant="ghost">
-              {user?.username}
+              {user?.name || user?.email}
             </MenuButton>
             <MenuList>
               <MenuItem icon={<FiUser />}>Profile</MenuItem>

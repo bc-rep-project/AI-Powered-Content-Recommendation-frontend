@@ -1,143 +1,134 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
-  Heading,
-  VStack,
   FormControl,
   FormLabel,
   Input,
+  VStack,
+  Heading,
+  useToast,
+  Container,
   Switch,
   Select,
-  Divider,
-  useToast,
-  useColorModeValue,
-  SimpleGrid,
+  Text,
 } from '@chakra-ui/react';
 import Layout from '../components/Layout';
+import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorAlert from '../components/ErrorAlert';
 import { useAuth } from '../context/AuthContext';
-import { updateUserSettings } from '../services/api';
-
-interface UserSettings {
-  email: string;
-  notificationsEnabled: boolean;
-  recommendationFrequency: string;
-  contentPreferences: string[];
-  language: string;
-}
+import { userService } from '../services/api';
+import type { UserSettings } from '../types';
 
 export default function SettingsPage() {
-  const { user } = useAuth();
-  const toast = useToast();
-  const bgColor = useColorModeValue('white', 'gray.700');
-
   const [settings, setSettings] = useState<UserSettings>({
-    email: user?.email || '',
-    notificationsEnabled: true,
+    email: '',
+    notificationsEnabled: false,
     recommendationFrequency: 'daily',
-    contentPreferences: ['movies', 'books'],
-    language: 'en',
+    contentPreferences: [],
+    language: 'en'
   });
-
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSave = async () => {
-    setIsLoading(true);
-    setError(null);
+  const { user } = useAuth();
+  const toast = useToast();
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const userSettings = await userService.getSettings();
+        setSettings(userSettings);
+      } catch (error) {
+        setError('Failed to load settings');
+        console.error('Error loading settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
 
     try {
-      await updateUserSettings(settings);
+      await userService.updateSettings(settings);
       toast({
-        title: 'Settings updated',
+        title: 'Success',
+        description: 'Settings updated successfully',
         status: 'success',
         duration: 3000,
+        isClosable: true,
       });
-    } catch (err) {
-      setError('Failed to update settings. Please try again.');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update settings',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <Layout>
+        <LoadingSpinner message="Loading settings..." />
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <ErrorAlert
+          title="Error Loading Settings"
+          message={error}
+        />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <Box p={4}>
-        <Heading mb={6}>Settings</Heading>
-
-        {error && (
-          <ErrorAlert
-            title="Error Saving Settings"
-            message={error}
-            onClose={() => setError(null)}
-          />
-        )}
-
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8}>
-          {/* Account Settings */}
-          <Box bg={bgColor} p={6} borderRadius="lg" shadow="base">
-            <Heading size="md" mb={4}>
-              Account Settings
-            </Heading>
-            <VStack spacing={4} align="stretch">
+      <Container maxW="container.md" py={8}>
+        <VStack spacing={8} align="stretch">
+          <Heading>Settings</Heading>
+          <Box as="form" onSubmit={handleSubmit}>
+            <VStack spacing={6}>
               <FormControl>
                 <FormLabel>Email</FormLabel>
                 <Input
                   type="email"
                   value={settings.email}
-                  onChange={(e) =>
-                    setSettings({ ...settings, email: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, email: e.target.value })}
+                  isReadOnly
                 />
-              </FormControl>
-
-              <FormControl display="flex" alignItems="center">
-                <FormLabel mb="0">Enable Notifications</FormLabel>
-                <Switch
-                  isChecked={settings.notificationsEnabled}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      notificationsEnabled: e.target.checked,
-                    })
-                  }
-                />
+                <Text fontSize="sm" color="gray.500" mt={1}>
+                  Contact support to change your email address
+                </Text>
               </FormControl>
 
               <FormControl>
-                <FormLabel>Language</FormLabel>
-                <Select
-                  value={settings.language}
-                  onChange={(e) =>
-                    setSettings({ ...settings, language: e.target.value })
-                  }
-                >
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
-                </Select>
+                <FormLabel>Notification Preferences</FormLabel>
+                <Switch
+                  isChecked={settings.notificationsEnabled}
+                  onChange={(e) => setSettings({ ...settings, notificationsEnabled: e.target.checked })}
+                />
               </FormControl>
-            </VStack>
-          </Box>
 
-          {/* Recommendation Settings */}
-          <Box bg={bgColor} p={6} borderRadius="lg" shadow="base">
-            <Heading size="md" mb={4}>
-              Recommendation Settings
-            </Heading>
-            <VStack spacing={4} align="stretch">
               <FormControl>
                 <FormLabel>Recommendation Frequency</FormLabel>
                 <Select
                   value={settings.recommendationFrequency}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      recommendationFrequency: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setSettings({ ...settings, recommendationFrequency: e.target.value })}
                 >
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
@@ -146,42 +137,29 @@ export default function SettingsPage() {
               </FormControl>
 
               <FormControl>
-                <FormLabel>Content Preferences</FormLabel>
+                <FormLabel>Language</FormLabel>
                 <Select
-                  multiple
-                  height="100px"
-                  value={settings.contentPreferences}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      contentPreferences: Array.from(
-                        e.target.selectedOptions,
-                        (option) => option.value
-                      ),
-                    })
-                  }
+                  value={settings.language}
+                  onChange={(e) => setSettings({ ...settings, language: e.target.value })}
                 >
-                  <option value="movies">Movies</option>
-                  <option value="books">Books</option>
-                  <option value="music">Music</option>
-                  <option value="articles">Articles</option>
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                  <option value="fr">French</option>
                 </Select>
               </FormControl>
+
+              <Button
+                type="submit"
+                colorScheme="brand"
+                width="full"
+                isLoading={isSaving}
+              >
+                Save Changes
+              </Button>
             </VStack>
           </Box>
-        </SimpleGrid>
-
-        <Divider my={8} />
-
-        <Button
-          colorScheme="brand"
-          size="lg"
-          onClick={handleSave}
-          isLoading={isLoading}
-        >
-          Save Changes
-        </Button>
-      </Box>
+        </VStack>
+      </Container>
     </Layout>
   );
 } 

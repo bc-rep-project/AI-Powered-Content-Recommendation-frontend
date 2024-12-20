@@ -1,50 +1,73 @@
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@sentry/browser';
 
-type LogLevel = 'info' | 'error' | 'warn' | 'debug';
+type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 
-interface LogContext {
-    [key: string]: unknown;
+interface LogData {
+  [key: string]: any;
 }
+
+// Map our log levels to Sentry severity levels
+const LOG_LEVEL_MAP: { [K in LogLevel]: Sentry.SeverityLevel } = {
+  error: 'error',
+  warn: 'warning',
+  info: 'info',
+  debug: 'debug'
+};
 
 class Logger {
-    private isDevelopment = process.env.NEXT_PUBLIC_ENV === 'development';
+  private static instance: Logger;
 
-    private log(level: LogLevel, message: string, data?: LogContext) {
-        if (this.isDevelopment) {
-            console[level](message, data);
-        }
+  private constructor() {
+    // Initialize Sentry if not in development
+    if (process.env.NODE_ENV !== 'development') {
+      Sentry.init({
+        dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+        environment: process.env.NODE_ENV
+      });
+    }
+  }
 
-        Sentry.addBreadcrumb({
-            category: 'app',
-            message,
-            data,
-            level,
-        });
+  static getInstance(): Logger {
+    if (!Logger.instance) {
+      Logger.instance = new Logger();
+    }
+    return Logger.instance;
+  }
+
+  log(message: string, data?: LogData, level: LogLevel = 'info'): void {
+    // Always log to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console[level](message, data);
+      return;
     }
 
-    public info(message: string, data?: LogContext): void {
-        this.log('info', message, data);
+    // Log to Sentry in production
+    Sentry.withScope((scope) => {
+      if (data) {
+        scope.setExtras(data);
+      }
+      scope.setLevel(LOG_LEVEL_MAP[level]);
+      Sentry.captureMessage(message);
+    });
+  }
+
+  error(error: Error, data?: LogData): void {
+    if (process.env.NODE_ENV === 'development') {
+      console.error(error, data);
+      return;
     }
 
-    public error(error: Error, context?: LogContext): void {
-        if (this.isDevelopment) {
-            console.error(error);
-        }
-
-        Sentry.captureException(error, {
-            extra: context,
-        });
-    }
-
-    public warn(message: string, data?: LogContext): void {
-        this.log('warn', message, data);
-    }
-
-    public debug(message: string, data?: LogContext): void {
-        if (this.isDevelopment) {
-            this.log('debug', message, data);
-        }
-    }
+    Sentry.withScope((scope) => {
+      if (data) {
+        scope.setExtras(data);
+      }
+      Sentry.captureException(error);
+    });
+  }
 }
 
-export const logger = new Logger(); 
+// Export a singleton instance
+export const logger = Logger.getInstance();
+
+// Export types for use in other files
+export type { LogLevel, LogData }; 

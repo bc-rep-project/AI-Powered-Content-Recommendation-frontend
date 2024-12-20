@@ -1,16 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
+  Grid,
   Heading,
-  SimpleGrid,
   Input,
-  InputGroup,
-  InputLeftElement,
   Select,
-  Stack,
+  VStack,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { FiSearch } from 'react-icons/fi';
 import Layout from '../components/Layout';
 import RecommendationList from '../components/RecommendationList';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -21,9 +18,7 @@ import type { Recommendation } from '../types';
 
 export default function DiscoverPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [category, setCategory] = useState('all');
-  const bgColor = useColorModeValue('white', 'gray.700');
-
+  const [category, setCategory] = useState('');
   const {
     data: content,
     error,
@@ -31,54 +26,57 @@ export default function DiscoverPage() {
     execute: loadContent,
   } = useAsync<Recommendation[]>();
 
+  const bgColor = useColorModeValue('white', 'gray.800');
+
+  useEffect(() => {
+    loadContent(() => fetchDiscoverContent());
+  }, [loadContent]);
+
   // Load content when search or category changes
   const handleSearch = async () => {
     await loadContent(() => fetchDiscoverContent({ searchQuery, category }));
   };
 
+  useEffect(() => {
+    const timer = setTimeout(handleSearch, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, category]);
+
   return (
     <Layout>
       <Box p={4}>
-        <Heading mb={6}>Discover New Content</Heading>
+        <Heading mb={6}>Discover Content</Heading>
 
-        <Stack spacing={4} mb={8}>
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <FiSearch />
-              </InputLeftElement>
-              <Input
-                placeholder="Search content..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              />
-            </InputGroup>
-            <Select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              bg={bgColor}
-            >
-              <option value="all">All Categories</option>
-              <option value="movies">Movies</option>
-              <option value="books">Books</option>
-              <option value="music">Music</option>
-              <option value="articles">Articles</option>
-            </Select>
-          </SimpleGrid>
-        </Stack>
+        <VStack spacing={4} mb={8}>
+          <Input
+            placeholder="Search content..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Select
+            placeholder="Select category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="articles">Articles</option>
+            <option value="videos">Videos</option>
+            <option value="podcasts">Podcasts</option>
+          </Select>
+        </VStack>
 
         {error && (
           <ErrorAlert
             title="Error Loading Content"
-            message="Failed to load discover content. Please try again."
+            message="There was an error loading the content. Please try again later."
           />
         )}
 
         {isLoading ? (
-          <LoadingSpinner message="Discovering content for you..." />
+          <LoadingSpinner message="Loading content..." />
         ) : (
-          content && <RecommendationList recommendations={content} />
+          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={6}>
+            {content && <RecommendationList recommendations={content} />}
+          </Grid>
         )}
       </Box>
     </Layout>

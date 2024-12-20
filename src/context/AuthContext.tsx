@@ -1,127 +1,148 @@
-import * as React from 'react';
-import { useRouter } from 'next/router';
-import { api } from '../services/api';
-import type { User, AuthResponse } from '../types';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { User } from '../types';
+import { authService } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
-  isLoading: boolean;
+  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  loading: boolean;
   loginWithGoogle: () => Promise<void>;
   loginWithGithub: () => Promise<void>;
   loginWithFacebook: () => Promise<void>;
-  logout: () => void;
-}
-
-interface AuthProviderProps {
-  children: React.ReactNode;
 }
 
 const defaultContext: AuthContextType = {
   user: null,
-  isLoading: false,
-  login: async () => { throw new Error('AuthContext not initialized'); },
-  loginWithGoogle: async () => { throw new Error('AuthContext not initialized'); },
-  loginWithGithub: async () => { throw new Error('AuthContext not initialized'); },
-  loginWithFacebook: async () => { throw new Error('AuthContext not initialized'); },
-  logout: () => { throw new Error('AuthContext not initialized'); },
+  isAuthenticated: false,
+  login: async () => {
+    throw new Error('AuthContext not initialized');
+  },
+  logout: () => {
+    throw new Error('AuthContext not initialized');
+  },
+  loading: false,
+  loginWithGoogle: async () => {
+    throw new Error('AuthContext not initialized');
+  },
+  loginWithGithub: async () => {
+    throw new Error('AuthContext not initialized');
+  },
+  loginWithFacebook: async () => {
+    throw new Error('AuthContext not initialized');
+  }
 };
 
-const AuthContext = React.createContext<AuthContextType>(defaultContext);
-AuthContext.displayName = 'AuthContext';
+const AuthContext = createContext<AuthContextType>(defaultContext);
 
-export const AuthProvider = React.memo(function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const router = useRouter();
+interface Props {
+  children: React.ReactNode;
+}
 
-  const login = React.useCallback(async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const response = await api.post<AuthResponse>('/token', {
-        username: email,
-        password,
-      });
+const AuthProvider = ({ children }: Props) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-      const { access_token } = response.data;
-      localStorage.setItem('token', access_token);
-      
-      // Get user data
-      const userResponse = await api.get<User>('/users/me');
-      setUser(userResponse.data);
-      
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
-
-  const loginWithGoogle = React.useCallback(async () => {
-    try {
-      setIsLoading(true);
-      window.location.href = '/api/v1/auth/google/login';
-    } catch (error) {
-      console.error('Google login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const userData = await authService.validateToken(token);
+            setUser(userData);
+          } catch (error) {
+            console.error('Token validation failed:', error);
+            localStorage.removeItem('token');
+          }
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
-  const loginWithGithub = React.useCallback(async () => {
+  const login = async (email: string, password: string) => {
     try {
-      setIsLoading(true);
-      window.location.href = '/api/v1/auth/github/login';
+      const response = await authService.login(email, password);
+      setUser(response.user);
+      localStorage.setItem('token', response.token);
+      window.location.href = '/dashboard';
     } catch (error) {
-      console.error('GitHub login error:', error);
+      console.error('Login failed:', error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
+  };
 
-  const loginWithFacebook = React.useCallback(async () => {
-    try {
-      setIsLoading(true);
-      window.location.href = '/api/v1/auth/facebook/login';
-    } catch (error) {
-      console.error('Facebook login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const logout = React.useCallback(() => {
-    localStorage.removeItem('token');
+  const logout = () => {
     setUser(null);
-    router.push('/login');
-  }, [router]);
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
 
-  const value = React.useMemo(() => ({
+  const loginWithGoogle = async () => {
+    try {
+      const response = await authService.loginWithGoogle();
+      setUser(response.user);
+      localStorage.setItem('token', response.token);
+      window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Google login failed:', error);
+      throw error;
+    }
+  };
+
+  const loginWithGithub = async () => {
+    try {
+      const response = await authService.loginWithGithub();
+      setUser(response.user);
+      localStorage.setItem('token', response.token);
+      window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Github login failed:', error);
+      throw error;
+    }
+  };
+
+  const loginWithFacebook = async () => {
+    try {
+      const response = await authService.loginWithFacebook();
+      setUser(response.user);
+      localStorage.setItem('token', response.token);
+      window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Facebook login failed:', error);
+      throw error;
+    }
+  };
+
+  const contextValue = {
     user,
+    isAuthenticated: !!user,
     login,
+    logout,
+    loading,
     loginWithGoogle,
     loginWithGithub,
-    loginWithFacebook,
-    logout,
-    isLoading,
-  }), [user, login, loginWithGoogle, loginWithGithub, loginWithFacebook, logout, isLoading]);
+    loginWithFacebook
+  };
 
   return React.createElement(
     AuthContext.Provider,
-    { value },
+    { value: contextValue },
     children
   );
-});
+};
 
-export function useAuth(): AuthContextType {
-  const context = React.useContext(AuthContext);
+const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+};
+
+export { AuthProvider, useAuth }; 
