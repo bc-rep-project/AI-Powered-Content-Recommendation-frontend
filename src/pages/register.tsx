@@ -36,89 +36,68 @@ export default function RegisterPage() {
   const router = useRouter();
   const toast = useToast();
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!username) {
-      newErrors.username = 'Username is required';
+  const validateForm = () => {
+    if (!username || !email || !password) {
+      toast({
+        title: "Validation Error",
+        description: "All fields are required",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return false;
     }
 
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
+    if (password.length < 8) {
+      toast({
+        title: "Validation Error",
+        description: "Password must be at least 8 characters long",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return false;
     }
 
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    if (!email.includes('@')) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid email address",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return false;
     }
 
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
+    if (!validateForm()) return;
 
     try {
-      const registrationData = {
+      const response = await authService.register({
         username: username.trim(),
         email: email.trim().toLowerCase(),
         password: password
-      };
-
-      console.log('Attempting registration with:', {
-        ...registrationData,
-        password: '***'
-      });
-      
-      const response = await authService.register(registrationData);
-      console.log('Registration successful:', {
-        ...response,
-        access_token: '***'
       });
 
       if (response.access_token) {
         localStorage.setItem('token', response.access_token);
-        
-        toast({
-          title: 'Registration successful',
-          description: 'You have been automatically logged in',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-
         router.push('/dashboard');
       }
     } catch (error: any) {
-      console.error('Registration error:', {
-        status: error.response?.status,
-        message: error.response?.data?.detail || error.message,
-        data: error.response?.data
-      });
-
+      const errorMessage = error.response?.data?.detail || 'Registration failed';
       toast({
-        title: 'Registration failed',
-        description: error.response?.data?.detail || 'Registration failed. Please try again.',
-        status: 'error',
+        title: "Registration Failed",
+        description: errorMessage,
+        status: "error",
         duration: 5000,
         isClosable: true,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 

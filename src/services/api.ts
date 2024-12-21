@@ -105,29 +105,13 @@ export const authService = {
 
   async register(userData: UserCreateData): Promise<AuthResponse> {
     try {
-      // Log the exact data being sent
-      console.log('Sending registration data:', {
-        username: userData.username,
-        email: userData.email,
-        password: userData.password
-      });
-
-      const response = await apiClient.post(API_ENDPOINTS.auth.register, userData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      // Log the response for debugging
-      console.log('Raw registration response:', response);
+      const response = await apiClient.post(API_ENDPOINTS.auth.register, userData);
       return response.data;
     } catch (error: any) {
-      // Enhanced error logging
       console.error('Registration error:', {
         status: error.response?.status,
         data: error.response?.data,
-        headers: error.response?.headers,
-        requestData: userData
+        requestData: { ...userData, password: '[REDACTED]' }
       });
       throw error;
     }
