@@ -65,33 +65,33 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      await authService.register({
+      const userData = {
         username,
         email,
         password
-      });
+      };
+
+      console.log('Sending registration data:', userData);
       
+      const response = await authService.register(userData);
+      console.log('Registration response:', response);
+
       toast({
         title: 'Registration successful',
-        description: 'Please login with your new account',
         status: 'success',
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
-      
+
       router.push('/login');
     } catch (error) {
+      console.error('Registration error:', error);
       toast({
         title: 'Registration failed',
-        description: error instanceof Error ? error.message : 'Please try again.',
+        description: error instanceof Error ? error.message : 'Please try again',
         status: 'error',
         duration: 5000,
         isClosable: true,

@@ -39,12 +39,14 @@ const apiClient = axios.create({
   withCredentials: false
 });
 
-// Remove the default Content-Type header as it will be set automatically for FormData
-delete apiClient.defaults.headers['Content-Type'];
-
-// Add request interceptor for debugging
+// Add request interceptor for debugging with more details
 apiClient.interceptors.request.use(request => {
-  console.log('Request:', request.url);
+  console.log('Request Details:', {
+    url: request.url,
+    method: request.method,
+    headers: request.headers,
+    data: request.data
+  });
   return request;
 });
 
@@ -56,6 +58,21 @@ apiClient.interceptors.request.use(request => {
   }
   return request;
 });
+
+// Add response interceptor for better error handling
+apiClient.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      headers: error.config?.headers
+    });
+    return Promise.reject(error);
+  }
+);
 
 // Mapping function
 const mapRecommendationResponse = (response: RecommendationResponse): Recommendation => ({
@@ -85,7 +102,11 @@ export const authService = {
     password: string;
     name?: string;
   }): Promise<AuthResponse> {
-    const response = await apiClient.post(API_ENDPOINTS.auth.register, userData);
+    const response = await apiClient.post(API_ENDPOINTS.auth.register, userData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
     return response.data;
   },
 
