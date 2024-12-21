@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { User, RecommendationResponse, InteractionData, AuthResponse, UserStats, Recommendation, FavoritesData, Collection, UserSettings, TrendingData } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 // Add DiscoverParams interface
 interface DiscoverParams {
@@ -18,7 +18,8 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true // Important for cookies/sessions
 });
 
 // Mapping function
@@ -91,27 +92,27 @@ export const authService = {
 
 // API Endpoints
 export const API_ENDPOINTS = {
-  recommendations: '/api/recommendations',
-  interactions: '/api/interactions',
-  discover: '/api/discover',
-  favorites: '/api/favorites',
-  collections: '/api/collections',
-  trending: '/api/trending',
+  recommendations: '/recommendations',
+  interactions: '/interactions',
+  discover: '/discover',
+  favorites: '/favorites',
+  collections: '/collections',
+  trending: '/trending',
   auth: {
-    login: '/api/auth/login',
-    register: '/api/auth/register',
-    refresh: '/api/auth/refresh',
-    validate: '/api/auth/validate',
-    forgotPassword: '/api/auth/forgot-password',
-    resetPassword: '/api/auth/reset-password',
-    google: '/api/auth/google',
-    github: '/api/auth/github',
-    facebook: '/api/auth/facebook'
+    login: '/auth/login',
+    register: '/auth/register',
+    refresh: '/auth/refresh',
+    validate: '/auth/validate',
+    forgotPassword: '/auth/forgot-password',
+    resetPassword: '/auth/reset-password',
+    google: '/auth/google',
+    github: '/auth/github',
+    facebook: '/auth/facebook'
   },
   user: {
-    profile: '/api/user/profile',
-    stats: '/api/user/stats',
-    settings: '/api/user/settings'
+    profile: '/user/profile',
+    stats: '/user/stats',
+    settings: '/user/settings'
   }
 };
 
