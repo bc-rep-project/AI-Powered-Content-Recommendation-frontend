@@ -19,15 +19,26 @@ interface CreateCollectionParams {
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
   withCredentials: false
 });
 
+// Remove the default Content-Type header as it will be set automatically for FormData
+delete apiClient.defaults.headers['Content-Type'];
+
 // Add request interceptor for debugging
 apiClient.interceptors.request.use(request => {
   console.log('Request:', request.url);
+  return request;
+});
+
+// Add an interceptor to include the auth token
+apiClient.interceptors.request.use(request => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    request.headers['Authorization'] = `Bearer ${token}`;
+  }
   return request;
 });
 
@@ -49,11 +60,7 @@ export const authService = {
     formData.append('username', email);
     formData.append('password', password);
 
-    const response = await apiClient.post(API_ENDPOINTS.auth.login, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    const response = await apiClient.post(API_ENDPOINTS.auth.login, formData);
     return response.data;
   },
 
