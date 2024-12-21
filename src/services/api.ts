@@ -45,13 +45,13 @@ const mapRecommendationResponse = (response: RecommendationResponse): Recommenda
 // Auth Service
 export const authService = {
   async login(email: string, password: string): Promise<AuthResponse> {
-    const formData = new URLSearchParams();
+    const formData = new FormData();
     formData.append('username', email);
     formData.append('password', password);
 
     const response = await apiClient.post(API_ENDPOINTS.auth.login, formData, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'multipart/form-data'
       }
     });
     return response.data;
