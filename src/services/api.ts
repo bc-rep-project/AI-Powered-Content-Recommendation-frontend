@@ -128,27 +128,27 @@ export const authService = {
 
 // API Endpoints
 export const API_ENDPOINTS = {
-  recommendations: '/recommendations',
-  interactions: '/interactions',
-  discover: '/discover',
-  favorites: '/favorites',
-  collections: '/collections',
-  trending: '/trending',
+  recommendations: '/api/v1/recommendations',
+  interactions: '/api/v1/interactions',
+  discover: '/api/v1/discover',
+  favorites: '/api/v1/favorites',
+  collections: '/api/v1/collections',
+  trending: '/api/v1/trending',
   auth: {
-    login: '/auth/login',
-    register: '/auth/register',
-    refresh: '/auth/refresh',
-    validate: '/auth/validate',
-    forgotPassword: '/auth/forgot-password',
-    resetPassword: '/auth/reset-password',
-    google: '/auth/google',
-    github: '/auth/github',
-    facebook: '/auth/facebook'
+    login: '/api/v1/auth/login',
+    register: '/api/v1/auth/register',
+    refresh: '/api/v1/auth/refresh',
+    validate: '/api/v1/auth/validate',
+    forgotPassword: '/api/v1/auth/forgot-password',
+    resetPassword: '/api/v1/auth/reset-password',
+    google: '/api/v1/auth/google',
+    github: '/api/v1/auth/github',
+    facebook: '/api/v1/auth/facebook'
   },
   user: {
-    profile: '/user/profile',
-    stats: '/user/stats',
-    settings: '/user/settings'
+    profile: '/api/v1/user/profile',
+    stats: '/api/v1/user/stats',
+    settings: '/api/v1/user/settings'
   }
 };
 
