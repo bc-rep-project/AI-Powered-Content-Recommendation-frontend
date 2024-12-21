@@ -1,7 +1,9 @@
 import axios from 'axios';
 import type { User, RecommendationResponse, InteractionData, AuthResponse, UserStats, Recommendation, FavoritesData, Collection, UserSettings, TrendingData } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+console.log('API_BASE_URL:', API_BASE_URL);
 
 // Add DiscoverParams interface
 interface DiscoverParams {
@@ -17,9 +19,16 @@ interface CreateCollectionParams {
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
-  withCredentials: true
+  withCredentials: false
+});
+
+// Add request interceptor for debugging
+apiClient.interceptors.request.use(request => {
+  console.log('Request:', request.url);
+  return request;
 });
 
 // Mapping function
