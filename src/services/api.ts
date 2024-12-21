@@ -85,6 +85,13 @@ const mapRecommendationResponse = (response: RecommendationResponse): Recommenda
   metadata: response.metadata
 });
 
+// Add interface to match backend exactly
+interface UserCreateData {
+  username: string;
+  email: string;
+  password: string;
+}
+
 // Auth Service
 export const authService = {
   async login(email: string, password: string): Promise<AuthResponse> {
@@ -96,33 +103,32 @@ export const authService = {
     return response.data;
   },
 
-  async register(userData: {
-    username: string;
-    email: string;
-    password: string;
-    name?: string;
-  }): Promise<AuthResponse> {
+  async register(userData: UserCreateData): Promise<AuthResponse> {
     try {
-      // Format the data exactly as the backend expects it
-      const registerData = {
+      // Log the exact data being sent
+      console.log('Sending registration data:', {
         username: userData.username,
         email: userData.email,
         password: userData.password
-      };
+      });
 
-      console.log('Sending registration data:', registerData);
-
-      const response = await apiClient.post(API_ENDPOINTS.auth.register, registerData, {
+      const response = await apiClient.post(API_ENDPOINTS.auth.register, userData, {
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json'
         }
       });
 
-      console.log('Registration response:', response.data);
+      // Log the response for debugging
+      console.log('Raw registration response:', response);
       return response.data;
-    } catch (error) {
-      console.error('Registration error details:', error);
+    } catch (error: any) {
+      // Enhanced error logging
+      console.error('Registration error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        headers: error.response?.headers,
+        requestData: userData
+      });
       throw error;
     }
   },

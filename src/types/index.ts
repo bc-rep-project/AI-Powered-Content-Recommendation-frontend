@@ -108,4 +108,10 @@ export interface ApiEndpoints {
     stats: string;
     settings: string;
   };
+}
+
+export interface UserCreateData {
+  username: string;
+  email: string;
+  password: string;
 } 

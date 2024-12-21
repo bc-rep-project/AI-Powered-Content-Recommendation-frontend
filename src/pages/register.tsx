@@ -73,33 +73,46 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const userData = {
-        username,
-        email,
-        password
+      const registrationData = {
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
+        password: password
       };
 
-      console.log('Attempting registration with:', userData);
+      console.log('Attempting registration with:', {
+        ...registrationData,
+        password: '***'
+      });
       
-      const response = await authService.register(userData);
-      console.log('Registration successful:', response);
-
-      localStorage.setItem('token', response.access_token);
-      
-      toast({
-        title: 'Registration successful',
-        description: 'You have been automatically logged in',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
+      const response = await authService.register(registrationData);
+      console.log('Registration successful:', {
+        ...response,
+        access_token: '***'
       });
 
-      router.push('/dashboard');
+      if (response.access_token) {
+        localStorage.setItem('token', response.access_token);
+        
+        toast({
+          title: 'Registration successful',
+          description: 'You have been automatically logged in',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+
+        router.push('/dashboard');
+      }
     } catch (error: any) {
-      console.error('Registration error:', error.response?.data || error);
+      console.error('Registration error:', {
+        status: error.response?.status,
+        message: error.response?.data?.detail || error.message,
+        data: error.response?.data
+      });
+
       toast({
         title: 'Registration failed',
-        description: error.response?.data?.detail || 'Please try again',
+        description: error.response?.data?.detail || 'Registration failed. Please try again.',
         status: 'error',
         duration: 5000,
         isClosable: true,
