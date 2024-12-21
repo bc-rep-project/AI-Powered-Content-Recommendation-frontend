@@ -103,26 +103,24 @@ export const authService = {
     name?: string;
   }): Promise<AuthResponse> {
     try {
-      // Register the user with proper data structure
-      const registerResponse = await apiClient.post(API_ENDPOINTS.auth.register, {
-        email: userData.email,
+      // Format the data exactly as the backend expects it
+      const registerData = {
         username: userData.username,
-        password: userData.password  // Changed from hashed_password to password
-      }, {
+        email: userData.email,
+        password: userData.password
+      };
+
+      console.log('Sending registration data:', registerData);
+
+      const response = await apiClient.post(API_ENDPOINTS.auth.register, registerData, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
       });
 
-      console.log('Register response:', registerResponse);
-
-      // After successful registration, login to get the token
-      const formData = new FormData();
-      formData.append('username', userData.email);
-      formData.append('password', userData.password);
-
-      const loginResponse = await apiClient.post(API_ENDPOINTS.auth.login, formData);
-      return loginResponse.data;
+      console.log('Registration response:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Registration error details:', error);
       throw error;

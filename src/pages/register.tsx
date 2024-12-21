@@ -79,10 +79,10 @@ export default function RegisterPage() {
         password
       };
 
-      console.log('Sending registration data:', userData);
+      console.log('Attempting registration with:', userData);
       
       const response = await authService.register(userData);
-      console.log('Registration response:', response);
+      console.log('Registration successful:', response);
 
       localStorage.setItem('token', response.access_token);
       
@@ -95,11 +95,11 @@ export default function RegisterPage() {
       });
 
       router.push('/dashboard');
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (error: any) {
+      console.error('Registration error:', error.response?.data || error);
       toast({
         title: 'Registration failed',
-        description: error instanceof Error ? error.message : 'Please try again',
+        description: error.response?.data?.detail || 'Please try again',
         status: 'error',
         duration: 5000,
         isClosable: true,
