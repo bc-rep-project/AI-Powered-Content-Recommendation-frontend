@@ -39,13 +39,15 @@ const apiClient = axios.create({
   withCredentials: false
 });
 
-// Add request interceptor for debugging with more details
+// Add request interceptor for detailed logging
 apiClient.interceptors.request.use(request => {
   console.log('Request Details:', {
     url: request.url,
     method: request.method,
     headers: request.headers,
-    data: request.data
+    data: request.data instanceof FormData 
+      ? Object.fromEntries(request.data.entries())
+      : request.data
   });
   return request;
 });
@@ -59,7 +61,7 @@ apiClient.interceptors.request.use(request => {
   return request;
 });
 
-// Add response interceptor for better error handling
+// Add response interceptor for error handling
 apiClient.interceptors.response.use(
   response => response,
   error => {
@@ -105,7 +107,24 @@ export const authService = {
 
   async register(userData: UserCreateData): Promise<AuthResponse> {
     try {
-      const response = await apiClient.post(API_ENDPOINTS.auth.register, userData);
+      // Format data to match backend expectations exactly
+      const formData = new FormData();
+      formData.append('username', userData.username);
+      formData.append('email', userData.email);
+      formData.append('password', userData.password);
+
+      const response = await apiClient.post(API_ENDPOINTS.auth.register, formData, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      // Log for debugging
+      console.log('Registration response:', {
+        status: response.status,
+        data: response.data
+      });
+
       return response.data;
     } catch (error: any) {
       console.error('Registration error:', {

@@ -78,23 +78,39 @@ export default function RegisterPage() {
     
     if (!validateForm()) return;
 
+    setIsLoading(true);
+
     try {
-      const response = await authService.register({
+      const formData = {
         username: username.trim(),
         email: email.trim().toLowerCase(),
         password: password
+      };
+
+      console.log('Sending registration data:', {
+        ...formData,
+        password: '[REDACTED]'
       });
+
+      const response = await authService.register(formData);
 
       if (response.access_token) {
         localStorage.setItem('token', response.access_token);
+        toast({
+          title: 'Registration successful',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
         router.push('/dashboard');
       }
     } catch (error: any) {
+      setIsLoading(false);
       const errorMessage = error.response?.data?.detail || 'Registration failed';
       toast({
-        title: "Registration Failed",
+        title: 'Registration Failed',
         description: errorMessage,
-        status: "error",
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
