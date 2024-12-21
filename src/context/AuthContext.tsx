@@ -13,6 +13,7 @@ interface AuthContextType {
   loginWithFacebook: () => Promise<void>;
 }
 
+// Create a default context value
 const defaultContext: AuthContextType = {
   user: null,
   isAuthenticated: false,
@@ -34,42 +35,36 @@ const defaultContext: AuthContextType = {
   }
 };
 
+// Create the context with the default value
 const AuthContext = createContext<AuthContextType>(defaultContext);
 
-interface Props {
-  children: React.ReactNode;
-}
-
-const AuthProvider = ({ children }: Props) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          try {
-            const userData = await authService.validateToken(token);
-            setUser(userData);
-          } catch (error) {
-            console.error('Token validation failed:', error);
-            localStorage.removeItem('token');
-          }
+    const initAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const user = await authService.validateToken(token);
+          setUser(user);
+        } catch (error) {
+          console.error('Token validation failed:', error);
+          localStorage.removeItem('token');
         }
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
-    
-    checkAuth();
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       const response = await authService.login(email, password);
       setUser(response.user);
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.access_token);
       window.location.href = '/dashboard';
     } catch (error) {
       console.error('Login failed:', error);
@@ -87,7 +82,7 @@ const AuthProvider = ({ children }: Props) => {
     try {
       const response = await authService.loginWithGoogle();
       setUser(response.user);
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.access_token);
       window.location.href = '/dashboard';
     } catch (error) {
       console.error('Google login failed:', error);
@@ -99,7 +94,7 @@ const AuthProvider = ({ children }: Props) => {
     try {
       const response = await authService.loginWithGithub();
       setUser(response.user);
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.access_token);
       window.location.href = '/dashboard';
     } catch (error) {
       console.error('Github login failed:', error);
@@ -111,7 +106,7 @@ const AuthProvider = ({ children }: Props) => {
     try {
       const response = await authService.loginWithFacebook();
       setUser(response.user);
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.access_token);
       window.location.href = '/dashboard';
     } catch (error) {
       console.error('Facebook login failed:', error);
@@ -119,7 +114,7 @@ const AuthProvider = ({ children }: Props) => {
     }
   };
 
-  const contextValue = {
+  const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
     login,
@@ -132,17 +127,15 @@ const AuthProvider = ({ children }: Props) => {
 
   return React.createElement(
     AuthContext.Provider,
-    { value: contextValue },
+    { value },
     children
   );
 };
 
-const useAuth = (): AuthContextType => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-export { AuthProvider, useAuth }; 
+}; 

@@ -33,9 +33,9 @@ export interface InteractionData {
 }
 
 export interface AuthResponse {
+  access_token: string;
+  token_type: string;
   user: User;
-  token: string;
-  refreshToken?: string;
 }
 
 export interface ApiError {

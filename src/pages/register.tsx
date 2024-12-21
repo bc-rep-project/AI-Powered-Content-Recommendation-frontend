@@ -65,6 +65,11 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -79,18 +84,17 @@ export default function RegisterPage() {
       const response = await authService.register(userData);
       console.log('Registration response:', response);
 
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-      }
-
+      localStorage.setItem('token', response.access_token);
+      
       toast({
         title: 'Registration successful',
+        description: 'You have been automatically logged in',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
 
-      router.push('/login');
+      router.push('/dashboard');
     } catch (error) {
       console.error('Registration error:', error);
       toast({

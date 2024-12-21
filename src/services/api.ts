@@ -102,24 +102,31 @@ export const authService = {
     password: string;
     name?: string;
   }): Promise<AuthResponse> {
-    // First register the user
-    await apiClient.post(API_ENDPOINTS.auth.register, userData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    try {
+      // Register the user with proper data structure
+      const registerResponse = await apiClient.post(API_ENDPOINTS.auth.register, {
+        email: userData.email,
+        username: userData.username,
+        password: userData.password  // Changed from hashed_password to password
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
-    // Then get the token
-    const tokenResponse = await apiClient.post(API_ENDPOINTS.auth.token, {
-      username: userData.email,  // backend expects email as username
-      password: userData.password
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+      console.log('Register response:', registerResponse);
 
-    return tokenResponse.data;
+      // After successful registration, login to get the token
+      const formData = new FormData();
+      formData.append('username', userData.email);
+      formData.append('password', userData.password);
+
+      const loginResponse = await apiClient.post(API_ENDPOINTS.auth.login, formData);
+      return loginResponse.data;
+    } catch (error) {
+      console.error('Registration error details:', error);
+      throw error;
+    }
   },
 
   async refreshToken(): Promise<AuthResponse> {
