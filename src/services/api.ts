@@ -102,12 +102,24 @@ export const authService = {
     password: string;
     name?: string;
   }): Promise<AuthResponse> {
-    const response = await apiClient.post(API_ENDPOINTS.auth.register, userData, {
+    // First register the user
+    await apiClient.post(API_ENDPOINTS.auth.register, userData, {
       headers: {
         'Content-Type': 'application/json'
       }
     });
-    return response.data;
+
+    // Then get the token
+    const tokenResponse = await apiClient.post(API_ENDPOINTS.auth.token, {
+      username: userData.email,  // backend expects email as username
+      password: userData.password
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return tokenResponse.data;
   },
 
   async refreshToken(): Promise<AuthResponse> {
@@ -158,6 +170,7 @@ export const API_ENDPOINTS = {
   auth: {
     login: '/api/v1/auth/login',
     register: '/api/v1/auth/register',
+    token: '/api/v1/auth/token',
     refresh: '/api/v1/auth/refresh',
     validate: '/api/v1/auth/validate',
     forgotPassword: '/api/v1/auth/forgot-password',

@@ -79,6 +79,10 @@ export default function RegisterPage() {
       const response = await authService.register(userData);
       console.log('Registration response:', response);
 
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+      }
+
       toast({
         title: 'Registration successful',
         status: 'success',
