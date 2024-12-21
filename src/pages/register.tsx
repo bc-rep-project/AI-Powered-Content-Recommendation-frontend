@@ -93,19 +93,17 @@ export default function RegisterPage() {
       });
 
       const response = await authService.register(formData);
-
-      if (response.access_token) {
-        localStorage.setItem('token', response.access_token);
+      
+      if (response.email) {
         toast({
           title: 'Registration successful',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
-        router.push('/dashboard');
+        router.push('/login');
       }
     } catch (error: any) {
-      setIsLoading(false);
       const errorMessage = error.response?.data?.detail || 'Registration failed';
       toast({
         title: 'Registration Failed',
@@ -114,6 +112,8 @@ export default function RegisterPage() {
         duration: 5000,
         isClosable: true,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

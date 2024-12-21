@@ -105,35 +105,21 @@ export const authService = {
     return response.data;
   },
 
-  async register(userData: UserCreateData): Promise<AuthResponse> {
-    try {
-      // Format data to match backend expectations exactly
-      const formData = new FormData();
-      formData.append('username', userData.username);
-      formData.append('email', userData.email);
-      formData.append('password', userData.password);
-
-      const response = await apiClient.post(API_ENDPOINTS.auth.register, formData, {
+  async register(userData: UserCreateData) {
+    const response = await apiClient.post('/api/v1/auth/register', 
+      JSON.stringify({
+        username: userData.username.trim(),
+        email: userData.email.trim().toLowerCase(),
+        password: userData.password
+      }), 
+      {
         headers: {
+          'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
-      });
-
-      // Log for debugging
-      console.log('Registration response:', {
-        status: response.status,
-        data: response.data
-      });
-
-      return response.data;
-    } catch (error: any) {
-      console.error('Registration error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        requestData: { ...userData, password: '[REDACTED]' }
-      });
-      throw error;
-    }
+      }
+    );
+    return response.data;
   },
 
   async refreshToken(): Promise<AuthResponse> {
