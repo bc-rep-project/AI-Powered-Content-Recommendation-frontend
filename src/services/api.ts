@@ -16,6 +16,21 @@ interface CreateCollectionParams {
   items?: string[];
 }
 
+// Add interfaces for recommendation parameters
+interface RecommendationParams {
+  page?: number;
+  limit?: number;
+  category?: string;
+  minScore?: number;
+}
+
+interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -157,9 +172,30 @@ export const userService = {
 
 // Recommendation Service
 export const recommendationService = {
-  async getRecommendations(userId: string): Promise<Recommendation[]> {
-    const response = await apiClient.get(`${API_ENDPOINTS.recommendations}/${userId}`);
-    return response.data.map(mapRecommendationResponse);
+  async fetchRecommendations(params?: RecommendationParams): Promise<PaginatedResponse<Recommendation>> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.minScore) queryParams.append('min_score', params.minScore.toString());
+
+    const url = `${API_ENDPOINTS.recommendations}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await apiClient.get(url);
+    return {
+      items: response.data.items.map(mapRecommendationResponse),
+      total: response.data.total,
+      page: response.data.page,
+      totalPages: response.data.totalPages
+    };
+  },
+
+  async getRecommendationById(id: string): Promise<Recommendation> {
+    const response = await apiClient.get(`${API_ENDPOINTS.recommendations}/${id}`);
+    return mapRecommendationResponse(response.data);
+  },
+
+  async getRecommendationsByCategory(category: string): Promise<Recommendation[]> {
+    return this.fetchRecommendations({ category }).then(response => response.items);
   },
 
   async fetchInteractionHistory(): Promise<InteractionData[]> {
@@ -173,11 +209,6 @@ export const recommendationService = {
       type,
       timestamp: new Date().toISOString()
     });
-  },
-
-  async fetchRecommendations(): Promise<Recommendation[]> {
-    const response = await apiClient.get(API_ENDPOINTS.recommendations);
-    return response.data.map(mapRecommendationResponse);
   },
 
   async fetchDiscoverContent(params?: DiscoverParams): Promise<Recommendation[]> {

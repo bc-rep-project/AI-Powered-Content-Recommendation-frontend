@@ -1,112 +1,98 @@
-import { useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Grid,
+  Container,
   Heading,
-  SimpleGrid,
-  Stat,
-  StatLabel,
-  StatNumber,
-  useColorModeValue,
+  useToast,
+  VStack,
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
-import Layout from '../components/Layout';
 import RecommendationList from '../components/RecommendationList';
-import InteractionChart from '../components/InteractionChart';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorAlert from '../components/ErrorAlert';
-import { fetchRecommendations, fetchUserStats } from '../services/api';
-import { useAsync } from '../hooks/useAsync';
-import type { Recommendation, UserStats } from '../types';
+import { recommendationService } from '../services/api';
+import type { Recommendation } from '../types';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const {
-    data: recommendations,
-    error: recommendationsError,
-    isLoading: recommendationsLoading,
-    execute: executeRecommendations,
-  } = useAsync<Recommendation[]>();
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const toast = useToast();
 
-  const {
-    data: stats,
-    error: statsError,
-    isLoading: statsLoading,
-    execute: executeStats,
-  } = useAsync<UserStats>();
-
-  const bgColor = useColorModeValue('white', 'gray.700');
+  const loadRecommendations = useCallback(async (page: number, category?: string) => {
+    try {
+      setIsLoading(true);
+      const response = await recommendationService.fetchRecommendations({
+        page,
+        limit: 10,
+        category: category || undefined,
+      });
+      
+      setRecommendations(response.items);
+      setTotalPages(response.totalPages);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load recommendations');
+      toast({
+        title: 'Error',
+        description: 'Failed to load recommendations',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        await Promise.all([
-          executeRecommendations(fetchRecommendations),
-          executeStats(fetchUserStats),
-        ]);
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-      }
-    };
+    loadRecommendations(currentPage, selectedCategory);
+  }, [currentPage, selectedCategory, loadRecommendations]);
 
-    loadData();
-  }, [executeRecommendations, executeStats]);
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
 
-  if (recommendationsLoading || statsLoading) {
+  const handleCategoryChange = useCallback((category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1); // Reset to first page when changing category
+  }, []);
+
+  if (isLoading) {
     return (
-      <Layout>
-        <LoadingSpinner message="Loading your personalized dashboard..." />
-      </Layout>
+      <Container maxW="container.xl">
+        <LoadingSpinner />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxW="container.xl">
+        <ErrorAlert message={error} />
+      </Container>
     );
   }
 
   return (
-    <Layout>
-      <Box p={4}>
-        <Heading mb={6}>Welcome back, {user?.username}!</Heading>
-
-        {(recommendationsError || statsError) && (
-          <ErrorAlert
-            title="Error Loading Data"
-            message="There was an error loading your dashboard data. Please try again later."
-          />
-        )}
-
-        {/* Stats Overview */}
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
-          <Stat p={4} bg={bgColor} borderRadius="lg" shadow="base">
-            <StatLabel>Total Interactions</StatLabel>
-            <StatNumber>{stats?.totalInteractions ?? 0}</StatNumber>
-          </Stat>
-          <Stat p={4} bg={bgColor} borderRadius="lg" shadow="base">
-            <StatLabel>Recommendation Accuracy</StatLabel>
-            <StatNumber>{stats?.recommendationAccuracy ?? 0}%</StatNumber>
-          </Stat>
-          <Stat p={4} bg={bgColor} borderRadius="lg" shadow="base">
-            <StatLabel>Content Viewed</StatLabel>
-            <StatNumber>{stats?.contentViewed ?? 0}</StatNumber>
-          </Stat>
-        </SimpleGrid>
-
-        {/* Main Content */}
-        <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
-          {/* Recommendations List */}
-          <Box bg={bgColor} p={6} borderRadius="lg" shadow="base">
-            <Heading size="md" mb={4}>
-              Your Recommendations
-            </Heading>
-            <RecommendationList recommendations={recommendations ?? []} />
-          </Box>
-
-          {/* Interaction Chart */}
-          <Box bg={bgColor} p={6} borderRadius="lg" shadow="base">
-            <Heading size="md" mb={4}>
-              Interaction History
-            </Heading>
-            <InteractionChart />
-          </Box>
-        </Grid>
-      </Box>
-    </Layout>
+    <Container maxW="container.xl" py={8}>
+      <VStack spacing={8} align="stretch">
+        <Heading>Welcome back, {user?.name || 'User'}!</Heading>
+        
+        <RecommendationList
+          recommendations={recommendations}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          onCategoryChange={handleCategoryChange}
+          selectedCategory={selectedCategory}
+          isLoading={isLoading}
+        />
+      </VStack>
+    </Container>
   );
 } 

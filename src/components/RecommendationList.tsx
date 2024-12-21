@@ -1,140 +1,137 @@
+import React from 'react';
 import {
   Box,
   VStack,
   HStack,
   Text,
   Image,
-  Button,
   Badge,
+  Button,
   useColorModeValue,
-  useToast,
+  Flex,
+  Select,
 } from '@chakra-ui/react';
 import { FiThumbsUp, FiEye } from 'react-icons/fi';
-import { useState } from 'react';
-import { recommendationService } from '../services/api';
 import type { Recommendation } from '../types';
-import LoadingSpinner from './LoadingSpinner';
+import { recommendationService } from '../services/api';
+import Pagination from './Pagination';
 
 interface RecommendationListProps {
   recommendations: Recommendation[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onCategoryChange: (category: string) => void;
+  selectedCategory: string;
+  isLoading?: boolean;
 }
 
-const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations }) => {
-  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
-  const toast = useToast();
-  
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
+const RecommendationList = ({
+  recommendations,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onCategoryChange,
+  selectedCategory,
+  isLoading = false,
+}: RecommendationListProps): JSX.Element => {
+  const bgColor = useColorModeValue('white', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
 
   const handleInteraction = async (contentId: string, type: 'view' | 'like') => {
-    setLoadingStates(prev => ({ ...prev, [contentId]: true }));
-    
     try {
       await recommendationService.trackInteraction(contentId, type);
-      
-      toast({
-        title: 'Success',
-        description: `${type === 'view' ? 'Viewed' : 'Liked'} content successfully`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to record interaction. Please try again.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-      console.error('Error recording interaction:', error);
-    } finally {
-      setLoadingStates(prev => ({ ...prev, [contentId]: false }));
+      console.error('Failed to track interaction:', error);
     }
   };
 
-  if (recommendations.length === 0) {
-    return (
-      <Box textAlign="center" py={10}>
-        <Text color="gray.500">No recommendations available yet.</Text>
-      </Box>
-    );
-  }
-
   return (
-    <VStack spacing={4} align="stretch">
-      {recommendations.map((rec) => (
-        <Box
-          key={rec.content_id}
-          p={4}
-          bg={cardBg}
-          borderRadius="md"
-          border="1px"
-          borderColor={borderColor}
-          _hover={{ shadow: 'md' }}
-          position="relative"
+    <Box data-testid="recommendation-list">
+      <Flex mb={4} justifyContent="space-between" alignItems="center">
+        <Select
+          data-testid="category-filter"
+          value={selectedCategory}
+          onChange={(e) => onCategoryChange(e.target.value)}
+          maxW="200px"
         >
-          {loadingStates[rec.content_id] && (
-            <Box
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              bg="blackAlpha.200"
-              borderRadius="md"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <LoadingSpinner message="Recording interaction..." />
-            </Box>
-          )}
-          
-          <HStack spacing={4}>
-            {rec.image_url && (
-              <Image
-                src={rec.image_url}
-                alt={rec.title}
-                boxSize="100px"
-                objectFit="cover"
-                borderRadius="md"
-              />
-            )}
-            <Box flex="1">
-              <HStack justify="space-between" mb={2}>
-                <Text fontWeight="bold">{rec.title}</Text>
-                <Badge colorScheme="green">
-                  {Math.round(rec.score * 100)}% Match
-                </Badge>
-              </HStack>
-              <Text noOfLines={2} color="gray.500" mb={3}>
-                {rec.description}
-              </Text>
-              <HStack spacing={4}>
-                <Button
-                  size="sm"
-                  leftIcon={<FiEye />}
-                  onClick={() => handleInteraction(rec.content_id, 'view')}
-                  isLoading={loadingStates[rec.content_id]}
-                >
-                  View
-                </Button>
-                <Button
-                  size="sm"
-                  leftIcon={<FiThumbsUp />}
-                  variant="outline"
-                  onClick={() => handleInteraction(rec.content_id, 'like')}
-                  isLoading={loadingStates[rec.content_id]}
-                >
-                  Like
-                </Button>
-              </HStack>
-            </Box>
-          </HStack>
-        </Box>
-      ))}
-    </VStack>
+          <option value="">All Categories</option>
+          <option value="test">Test</option>
+          <option value="ai">AI</option>
+          <option value="technology">Technology</option>
+        </Select>
+      </Flex>
+
+      <VStack spacing={4} align="stretch">
+        {recommendations.map((rec) => (
+          <Box
+            key={rec.content_id}
+            p={4}
+            borderWidth="1px"
+            borderRadius="lg"
+            borderColor={borderColor}
+            bg={bgColor}
+            data-testid="recommendation-item"
+          >
+            <HStack spacing={4}>
+              {rec.image_url && (
+                <Image
+                  src={rec.image_url}
+                  alt={rec.title}
+                  boxSize="100px"
+                  objectFit="cover"
+                  borderRadius="md"
+                />
+              )}
+              <Box flex="1">
+                <HStack justify="space-between" mb={2}>
+                  <Text fontWeight="bold">{rec.title}</Text>
+                  <Badge
+                    colorScheme="green"
+                    data-testid="category-badge"
+                  >
+                    {rec.category}
+                  </Badge>
+                </HStack>
+                <Text color="gray.500" noOfLines={2} mb={3}>
+                  {rec.description}
+                </Text>
+                <HStack spacing={4}>
+                  <Button
+                    size="sm"
+                    leftIcon={<FiEye />}
+                    onClick={() => handleInteraction(rec.content_id, 'view')}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    size="sm"
+                    leftIcon={<FiThumbsUp />}
+                    variant="outline"
+                    onClick={() => handleInteraction(rec.content_id, 'like')}
+                  >
+                    Like
+                  </Button>
+                  <Badge colorScheme="purple">
+                    {Math.round(rec.score * 100)}% Match
+                  </Badge>
+                </HStack>
+              </Box>
+            </HStack>
+          </Box>
+        ))}
+      </VStack>
+
+      {totalPages > 1 && (
+        <Flex justify="center" mt={6}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </Flex>
+      )}
+    </Box>
   );
 };
 
