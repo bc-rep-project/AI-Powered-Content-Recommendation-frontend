@@ -7,10 +7,16 @@ interface RegisterFormData {
 
 const handleSubmit = async (formData: RegisterFormData) => {
   try {
+    // Add validation
+    if (!formData.email || !formData.password || !formData.username) {
+      throw new Error('All fields are required');
+    }
+
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         username: formData.username,
@@ -19,15 +25,16 @@ const handleSubmit = async (formData: RegisterFormData) => {
       })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Registration failed');
+      console.error('Registration error response:', data);
+      throw new Error(data.detail || 'Registration failed');
     }
 
-    const data = await response.json();
     return data;
-  } catch (error) {
-    console.error('Registration error:', error);
+  } catch (error: any) {
+    console.error('Registration error:', error.message);
     throw error;
   }
 }; 
