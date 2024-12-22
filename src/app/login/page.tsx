@@ -1,26 +1,27 @@
 const handleLogin = async (email: string, password: string) => {
   try {
     const formData = new URLSearchParams();
-    formData.append('username', email);  // OAuth2 spec uses 'username' for identifier
+    formData.append('username', email);
     formData.append('password', password);
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/token`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: formData
+      body: formData,
+      credentials: 'include'
     });
 
+    const data = await response.json();
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Login failed');
+      throw new Error(data.detail || 'Authentication failed');
     }
 
-    const data = await response.json();
+    localStorage.setItem('token', data.access_token);
     return data;
-  } catch (error: any) {
-    console.error('Login error:', error.message);
+  } catch (error) {
+    console.error('Login error:', error);
     throw error;
   }
 }; 
