@@ -20,7 +20,10 @@ export const authService = {
   async register(data: RegisterData): Promise<AuthResponse> {
     const response = await fetch(API_ENDPOINTS.register, {
       method: 'POST',
-      headers: API_HEADERS,
+      headers: {
+        ...API_HEADERS,
+        'Origin': 'https://ai-powered-content-recommendation-frontend.vercel.app'
+      },
       credentials: 'include',
       body: JSON.stringify(data),
     });
@@ -43,7 +46,9 @@ export const authService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Origin': 'https://ai-powered-content-recommendation-frontend.vercel.app'
         },
+        mode: 'cors',
         credentials: 'include',
         body: formData.toString(),
       });
