@@ -21,34 +21,42 @@ export const authService = {
     const response = await fetch(API_ENDPOINTS.register, {
       method: 'POST',
       headers: API_HEADERS,
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 
     if (!response.ok) {
-      throw new Error('Registration failed');
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || 'Registration failed');
     }
 
     return response.json();
   },
 
   async login(data: LoginData): Promise<AuthResponse> {
-    const formData = new URLSearchParams();
-    formData.append('username', data.username);
-    formData.append('password', data.password);
+    try {
+      const formData = new URLSearchParams();
+      formData.append('username', data.username);
+      formData.append('password', data.password);
 
-    const response = await fetch(API_ENDPOINTS.login, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formData.toString(),
-    });
+      const response = await fetch(API_ENDPOINTS.login, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        credentials: 'include',
+        body: formData.toString(),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.detail || 'Login failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || 'Login failed');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
-
-    return response.json();
   },
 }; 
