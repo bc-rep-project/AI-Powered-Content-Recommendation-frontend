@@ -1,332 +1,95 @@
-import axios from 'axios';
-import type { User, RecommendationResponse, InteractionData, AuthResponse, UserStats, Recommendation, FavoritesData, Collection, UserSettings, TrendingData } from '../types';
+import { API_CONFIG } from '../config/api';
+import { AuthResponse, RegisterData } from '../types/auth';
+import { RecommendationsResponse, ApiResponse } from '../types/api';
+import { retry } from '@/utils/retry';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+class ApiService {
+    private baseUrl: string;
+    
+    constructor() {
+        this.baseUrl = API_CONFIG.baseUrl;
+    }
 
-console.log('API_BASE_URL:', API_BASE_URL);
+    async register(userData: RegisterData): Promise<{ message: string }> {
+        const response = await fetch(`${this.baseUrl}${API_CONFIG.endpoints.register}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        });
+        return this.handleResponse(response);
+    }
 
-// Add DiscoverParams interface
-interface DiscoverParams {
-  searchQuery?: string;
-  category?: string;
-}
+    async login(email: string, password: string): Promise<AuthResponse> {
+        const formData = new URLSearchParams();
+        formData.append('username', email);
+        formData.append('password', password);
 
-interface CreateCollectionParams {
-  name: string;
-  items?: string[];
-}
+        const response = await fetch(`${this.baseUrl}${API_CONFIG.endpoints.login}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        });
+        return this.handleResponse(response);
+    }
 
-// Add interfaces for recommendation parameters
-interface RecommendationParams {
-  page?: number;
-  limit?: number;
-  category?: string;
-  minScore?: number;
-}
+    async getRecommendations(): Promise<RecommendationsResponse> {
+        return retry(async () => {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('No authentication token');
 
-interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
+            const response = await fetch(`${this.baseUrl}${API_CONFIG.endpoints.recommendations}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            return this.handleResponse<RecommendationsResponse>(response);
+        }, {
+            maxAttempts: 3,
+            delayMs: 1000,
+            backoff: true
+        });
+    }
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Accept': 'application/json'
-  },
-  withCredentials: false
-});
+    async checkHealth() {
+        const response = await fetch(`${this.baseUrl}${API_CONFIG.endpoints.health}`);
+        return this.handleResponse(response);
+    }
 
-// Add request interceptor for detailed logging
-apiClient.interceptors.request.use(request => {
-  console.log('Request Details:', {
-    url: request.url,
-    method: request.method,
-    headers: request.headers,
-    data: request.data instanceof FormData 
-      ? Object.fromEntries(request.data.entries())
-      : request.data
-  });
-  return request;
-});
+    async requestPasswordReset(email: string): Promise<{ message: string }> {
+        const response = await fetch(`${this.baseUrl}${API_CONFIG.endpoints.forgotPassword}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email })
+        });
+        return this.handleResponse(response);
+    }
 
-// Add an interceptor to include the auth token
-apiClient.interceptors.request.use(request => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    request.headers['Authorization'] = `Bearer ${token}`;
-  }
-  return request;
-});
+    async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+        const response = await fetch(`${this.baseUrl}${API_CONFIG.endpoints.resetPassword}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token, new_password: newPassword })
+        });
+        return this.handleResponse(response);
+    }
 
-// Add response interceptor for error handling
-apiClient.interceptors.response.use(
-  response => response,
-  error => {
-    console.error('API Error:', {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data,
-      headers: error.config?.headers
-    });
-    return Promise.reject(error);
-  }
-);
-
-// Mapping function
-const mapRecommendationResponse = (response: RecommendationResponse): Recommendation => ({
-  title: response.title,
-  description: response.description,
-  score: response.score,
-  image_url: response.image_url,
-  category: response.category,
-  content_id: response.content_id,
-  metadata: response.metadata
-});
-
-// Add interface to match backend exactly
-interface UserCreateData {
-  username: string;
-  email: string;
-  password: string;
-}
-
-// Auth Service
-export const authService = {
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const formData = new FormData();
-    formData.append('username', email);
-    formData.append('password', password);
-
-    const response = await apiClient.post(API_ENDPOINTS.auth.login, formData);
-    return response.data;
-  },
-
-  async register(userData: UserCreateData) {
-    const response = await apiClient.post('/api/v1/auth/register', 
-      JSON.stringify({
-        username: userData.username.trim(),
-        email: userData.email.trim().toLowerCase(),
-        password: userData.password
-      }), 
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+    private async handleResponse<T>(response: Response): Promise<T> {
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.detail || 'Request failed');
         }
-      }
-    );
-    return response.data;
-  },
-
-  async refreshToken(): Promise<AuthResponse> {
-    const response = await apiClient.post(API_ENDPOINTS.auth.refresh);
-    return response.data;
-  },
-
-  async validateToken(token: string): Promise<User> {
-    const response = await apiClient.post(API_ENDPOINTS.auth.validate, { token });
-    return response.data;
-  },
-
-  async forgotPassword(email: string): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.auth.forgotPassword, { email });
-  },
-
-  async resetPassword(token: string, newPassword: string): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.auth.resetPassword, {
-      token,
-      password: newPassword
-    });
-  },
-
-  async loginWithGoogle(): Promise<AuthResponse> {
-    const response = await apiClient.get(API_ENDPOINTS.auth.google);
-    return response.data;
-  },
-
-  async loginWithGithub(): Promise<AuthResponse> {
-    const response = await apiClient.get(API_ENDPOINTS.auth.github);
-    return response.data;
-  },
-
-  async loginWithFacebook(): Promise<AuthResponse> {
-    const response = await apiClient.get(API_ENDPOINTS.auth.facebook);
-    return response.data;
-  }
-};
-
-// API Endpoints
-export const API_ENDPOINTS = {
-  recommendations: '/api/v1/recommendations',
-  interactions: '/api/v1/interactions',
-  discover: '/api/v1/discover',
-  favorites: '/api/v1/favorites',
-  collections: '/api/v1/collections',
-  trending: '/api/v1/trending',
-  auth: {
-    login: '/api/v1/auth/login',
-    register: '/api/v1/auth/register',
-    token: '/api/v1/auth/token',
-    refresh: '/api/v1/auth/refresh',
-    validate: '/api/v1/auth/validate',
-    forgotPassword: '/api/v1/auth/forgot-password',
-    resetPassword: '/api/v1/auth/reset-password',
-    google: '/api/v1/auth/google',
-    github: '/api/v1/auth/github',
-    facebook: '/api/v1/auth/facebook'
-  },
-  user: {
-    profile: '/api/v1/user/profile',
-    stats: '/api/v1/user/stats',
-    settings: '/api/v1/user/settings'
-  }
-};
-
-// User Service
-export const userService = {
-  async fetchUserStats(): Promise<UserStats> {
-    const response = await apiClient.get(API_ENDPOINTS.user.stats);
-    return response.data;
-  },
-
-  async updateSettings(settings: UserSettings): Promise<UserSettings> {
-    const response = await apiClient.put(API_ENDPOINTS.user.settings, settings);
-    return response.data;
-  },
-
-  async getSettings(): Promise<UserSettings> {
-    const response = await apiClient.get(API_ENDPOINTS.user.settings);
-    return response.data;
-  }
-};
-
-// Recommendation Service
-export const recommendationService = {
-  async fetchRecommendations(params?: RecommendationParams): Promise<PaginatedResponse<Recommendation>> {
-    const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.category) queryParams.append('category', params.category);
-    if (params?.minScore) queryParams.append('min_score', params.minScore.toString());
-
-    const url = `${API_ENDPOINTS.recommendations}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    const response = await apiClient.get(url);
-    return {
-      items: response.data.items.map(mapRecommendationResponse),
-      total: response.data.total,
-      page: response.data.page,
-      totalPages: response.data.totalPages
-    };
-  },
-
-  async getRecommendationById(id: string): Promise<Recommendation> {
-    const response = await apiClient.get(`${API_ENDPOINTS.recommendations}/${id}`);
-    return mapRecommendationResponse(response.data);
-  },
-
-  async getRecommendationsByCategory(category: string): Promise<Recommendation[]> {
-    return this.fetchRecommendations({ category }).then(response => response.items);
-  },
-
-  async fetchInteractionHistory(): Promise<InteractionData[]> {
-    const response = await apiClient.get(`${API_ENDPOINTS.interactions}/history`);
-    return response.data;
-  },
-
-  async trackInteraction(contentId: string, type: 'view' | 'like'): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.interactions, {
-      contentId,
-      type,
-      timestamp: new Date().toISOString()
-    });
-  },
-
-  async fetchDiscoverContent(params?: DiscoverParams): Promise<Recommendation[]> {
-    const queryParams = new URLSearchParams();
-    if (params?.searchQuery) {
-      queryParams.append('search', params.searchQuery);
+        return data as T;
     }
-    if (params?.category) {
-      queryParams.append('category', params.category);
-    }
+}
 
-    const url = `${API_ENDPOINTS.discover}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    const response = await apiClient.get(url);
-    return response.data.map(mapRecommendationResponse);
-  }
-};
-
-// Favorites Service
-export const favoritesService = {
-  async fetchFavorites(): Promise<FavoritesData> {
-    const response = await apiClient.get(API_ENDPOINTS.favorites);
-    return {
-      ...response.data,
-      recent: response.data.recent.map(mapRecommendationResponse),
-      collections: response.data.collections.map((collection: any) => ({
-        ...collection,
-        items: collection.items.map(mapRecommendationResponse)
-      }))
-    };
-  },
-
-  async createCollection(params: CreateCollectionParams): Promise<Collection> {
-    const response = await apiClient.post(API_ENDPOINTS.collections, params);
-    return {
-      ...response.data,
-      items: response.data.items.map(mapRecommendationResponse)
-    };
-  },
-
-  async addToFavorites(contentId: string): Promise<void> {
-    await apiClient.post(`${API_ENDPOINTS.favorites}/${contentId}`);
-  },
-
-  async removeFromFavorites(contentId: string): Promise<void> {
-    await apiClient.delete(`${API_ENDPOINTS.favorites}/${contentId}`);
-  }
-};
-
-// Add Trending Service
-export const trendingService = {
-  async fetchTrending(): Promise<TrendingData> {
-    const response = await apiClient.get(API_ENDPOINTS.trending);
-    return {
-      ...response.data,
-      today: response.data.today.map(mapRecommendationResponse),
-      thisWeek: response.data.thisWeek.map(mapRecommendationResponse),
-      thisMonth: response.data.thisMonth.map(mapRecommendationResponse)
-    };
-  }
-};
-
-// Export convenience functions with proper types
-export const register = authService.register;
-export const fetchRecommendations = recommendationService.fetchRecommendations;
-export const fetchUserStats = userService.fetchUserStats;
-export const fetchDiscoverContent = (params?: DiscoverParams) => 
-  recommendationService.fetchDiscoverContent(params);
-export const fetchFavorites = favoritesService.fetchFavorites;
-export const createCollection = favoritesService.createCollection;
-export const updateUserSettings = userService.updateSettings;
-export const fetchTrendingContent = trendingService.fetchTrending;
-
-// Export types
-export type { 
-  User, 
-  RecommendationResponse, 
-  InteractionData, 
-  AuthResponse, 
-  UserStats, 
-  DiscoverParams,
-  CreateCollectionParams,
-  UserSettings,
-  TrendingData
-};
-
-// Export default client
-export default apiClient; 
+export const apiService = new ApiService(); 

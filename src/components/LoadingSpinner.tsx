@@ -1,22 +1,31 @@
-import { Flex, Spinner, Text } from '@chakra-ui/react';
-
 interface LoadingSpinnerProps {
-  message?: string;
+    size?: 'sm' | 'md' | 'lg';
+    fullScreen?: boolean;
 }
 
-export default function LoadingSpinner({ message = 'Loading...' }: LoadingSpinnerProps) {
-  return (
-    <Flex direction="column" align="center" justify="center" h="200px">
-      <Spinner
-        thickness="4px"
-        speed="0.65s"
-        emptyColor="gray.200"
-        color="brand.500"
-        size="xl"
-      />
-      <Text mt={4} color="gray.500">
-        {message}
-      </Text>
-    </Flex>
-  );
+const sizes = {
+    sm: 'h-6 w-6',
+    md: 'h-8 w-8',
+    lg: 'h-12 w-12'
+} as const;
+
+export function LoadingSpinner({ size = 'md', fullScreen = true }: LoadingSpinnerProps) {
+    const spinner = (
+        <div 
+            role="status"
+            className={`animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 ${sizes[size]}`}
+        >
+            <span className="sr-only">Loading...</span>
+        </div>
+    );
+
+    if (fullScreen) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                {spinner}
+            </div>
+        );
+    }
+
+    return spinner;
 } 

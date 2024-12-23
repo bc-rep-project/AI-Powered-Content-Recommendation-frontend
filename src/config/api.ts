@@ -1,15 +1,11 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-recommendation-api.onrender.com';
-
-export const API_ENDPOINTS = {
-    recommendations: '/recommendations',
-    interactions: '/interactions',
-    auth: {
-        login: '/auth/login',
-        register: '/auth/register',
-        refresh: '/auth/refresh'
-    },
-    user: {
-        profile: '/users/me',
-        preferences: '/users/preferences'
+export const API_CONFIG = {
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://ai-recommendation-api.onrender.com',
+    endpoints: {
+        register: '/api/v1/auth/register',
+        login: '/api/v1/auth/login',
+        recommendations: '/api/v1/recommendations',
+        health: '/health',
+        forgotPassword: '/api/v1/auth/forgot-password',
+        resetPassword: '/api/v1/auth/reset-password'
     }
 }; 

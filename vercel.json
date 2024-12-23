@@ -7,14 +7,12 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_URL": "@next_public_api_url",
-    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key"
+    "NEXT_PUBLIC_API_URL": "https://ai-recommendation-api.onrender.com/api/v1"
   },
   "rewrites": [
     {
       "source": "/api/v1/:path*",
-      "destination": "https://ai-content-recommendation.up.railway.app/api/v1/:path*"
+      "destination": "https://ai-recommendation-api.onrender.com/api/v1/:path*"
     }
   ],
   "headers": [
@@ -27,12 +25,5 @@
         { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" }
       ]
     }
-  ],
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_API_URL": "@next_public_api_url",
-      "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key"
-    }
-  }
+  ]
 } 

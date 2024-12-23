@@ -1,49 +1,47 @@
+'use client';
+
 import React from 'react';
-import * as Sentry from '@sentry/react';
 
-interface Props {
+type ErrorBoundaryProps = {
     children: React.ReactNode;
-    fallback?: React.ReactNode;
-}
+    fallback: React.ReactNode;
+};
 
-interface State {
+type ErrorBoundaryState = {
     hasError: boolean;
-    error?: Error;
-}
+    error: Error | null;
+};
 
-export class ErrorBoundary extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = { hasError: false };
-    }
+class ErrorBoundaryClass extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+    public state: ErrorBoundaryState = {
+        hasError: false,
+        error: null
+    };
 
-    static getDerivedStateFromError(error: Error): State {
-        return { hasError: true, error };
-    }
-
-    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        // Convert ErrorInfo to a plain object for Sentry
-        const errorInfoObj = {
-            componentStack: errorInfo.componentStack,
+    public static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+        return {
+            hasError: true,
+            error
         };
-
-        Sentry.captureException(error, {
-            extra: errorInfoObj,
-        });
     }
 
-    render() {
+    public componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+        console.error('Error caught by error boundary:', error, errorInfo);
+    }
+
+    public render(): React.ReactNode {
         if (this.state.hasError) {
-            return this.props.fallback || (
-                <div>
-                    <h2>Something went wrong.</h2>
-                    <button onClick={() => window.location.reload()}>
-                        Refresh Page
-                    </button>
-                </div>
-            );
+            return this.props.fallback;
         }
 
         return this.props.children;
     }
+}
+
+export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps): JSX.Element {
+    return (
+        <ErrorBoundaryClass fallback={fallback}>
+            {children}
+        </ErrorBoundaryClass>
+    );
 } 
