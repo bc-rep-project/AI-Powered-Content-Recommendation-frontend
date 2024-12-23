@@ -36,29 +36,37 @@ export const authService = {
     return response.json();
   },
 
-  async login(data: LoginData): Promise<AuthResponse> {
+  async login(loginData: LoginData): Promise<AuthResponse> {
     try {
       const formData = new URLSearchParams();
-      formData.append('username', data.username);
-      formData.append('password', data.password);
+      formData.append('grant_type', 'password');
+      formData.append('username', loginData.username);
+      formData.append('password', loginData.password);
 
       const response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
           'Origin': 'https://ai-powered-content-recommendation-frontend.vercel.app'
         },
-        mode: 'cors',
         credentials: 'include',
         body: formData.toString(),
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Invalid email or password');
+        }
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.detail || 'Login failed');
       }
 
-      return response.json();
+      const responseData = await response.json();
+      if (responseData.access_token) {
+        localStorage.setItem('auth_token', responseData.access_token);
+      }
+      return responseData;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
