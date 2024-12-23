@@ -32,17 +32,21 @@ export const authService = {
   },
 
   async login(data: LoginData): Promise<AuthResponse> {
-    const formData = new FormData();
+    const formData = new URLSearchParams();
     formData.append('username', data.username);
     formData.append('password', data.password);
 
     const response = await fetch(API_ENDPOINTS.login, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString(),
     });
 
     if (!response.ok) {
-      throw new Error('Login failed');
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || 'Login failed');
     }
 
     return response.json();
