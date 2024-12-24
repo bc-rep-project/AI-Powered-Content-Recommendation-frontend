@@ -6,46 +6,63 @@ import { useRouter, useSearchParams } from 'next/navigation';
 interface User {
   email: string;
   picture?: string;
+  provider?: string;
 }
 
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Handle OAuth callback parameters
-    const access_token = searchParams.get('access_token');
-    const userEmail = searchParams.get('user');
-    
-    if (access_token) {
-      // Store the token and user info
-      localStorage.setItem('auth_token', access_token);
-      if (userEmail) {
-        const userData = { email: userEmail };
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-      }
-      
-      // Clean up URL parameters
-      router.replace('/dashboard');
-    } else {
-      // Check if user is already authenticated
-      const storedToken = localStorage.getItem('auth_token');
-      const storedUser = localStorage.getItem('user');
-      
-      if (!storedToken || !storedUser) {
-        router.replace('/login');
-        return;
-      }
-      
+    const handleAuth = async () => {
       try {
-        setUser(JSON.parse(storedUser));
+        // Handle OAuth callback parameters
+        const access_token = searchParams.get('access_token');
+        const userEmail = searchParams.get('user');
+        const provider = searchParams.get('provider');
+        
+        if (access_token) {
+          // Store the token and user info
+          localStorage.setItem('auth_token', access_token);
+          if (userEmail) {
+            const userData = { 
+              email: userEmail,
+              provider: provider || undefined
+            };
+            localStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+          }
+          
+          // Clean up URL parameters
+          router.replace('/dashboard');
+        } else {
+          // Check if user is already authenticated
+          const storedToken = localStorage.getItem('auth_token');
+          const storedUser = localStorage.getItem('user');
+          
+          if (!storedToken || !storedUser) {
+            router.replace('/login');
+            return;
+          }
+          
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch (error) {
+            console.error('Error parsing stored user:', error);
+            router.replace('/login');
+          }
+        }
+        
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error parsing stored user:', error);
+        console.error('Authentication error:', error);
         router.replace('/login');
       }
-    }
+    };
+
+    handleAuth();
   }, [searchParams, router]);
 
   const handleLogout = () => {
@@ -54,12 +71,17 @@ export default function DashboardPage() {
     router.replace('/login');
   };
 
-  if (!user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex justify-center items-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
+  }
+
+  if (!user) {
+    router.replace('/login');
+    return null;
   }
 
   return (
@@ -71,7 +93,7 @@ export default function DashboardPage() {
             <span className="text-gray-600">{user.email}</span>
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
             >
               Logout
             </button>
@@ -81,8 +103,16 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h2 className="text-3xl font-bold text-gray-900">Welcome to your Dashboard</h2>
-          {/* Add your dashboard content here */}
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Welcome to your Dashboard</h2>
+          <div className="bg-white shadow rounded-lg p-6">
+            <h3 className="text-xl font-semibold mb-4">Your Profile</h3>
+            <div className="space-y-4">
+              <p><span className="font-medium">Email:</span> {user.email}</p>
+              {user.provider && (
+                <p><span className="font-medium">Sign in method:</span> {user.provider}</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
