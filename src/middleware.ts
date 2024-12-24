@@ -10,6 +10,7 @@ export function middleware(request: NextRequest) {
         pathname.startsWith('/_next') || // Next.js system paths
         pathname.startsWith('/api') ||   // API routes
         pathname.startsWith('/auth') ||  // Auth routes
+        pathname === '/' ||             // Root path (handled by page.tsx)
         pathname.match(/\.(ico|png|jpg|jpeg|svg|gif)$/) // Static files
     ) {
         return NextResponse.next();
@@ -18,15 +19,20 @@ export function middleware(request: NextRequest) {
     // Check for auth token
     const token = request.cookies.get('auth_token');
     
-    // If no token and not already on login page, redirect to login
-    if (!token && pathname !== '/login') {
-        const url = new URL('/login', request.url);
-        return NextResponse.redirect(url);
+    // Public routes that don't require authentication
+    const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/about'];
+    if (publicRoutes.includes(pathname)) {
+        // If user is authenticated and tries to access public routes, redirect to dashboard
+        if (token) {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+        return NextResponse.next();
     }
 
-    // If has token and on login page, redirect to dashboard
-    if (token && pathname === '/login') {
-        const url = new URL('/dashboard', request.url);
+    // Protected routes - redirect to login if no token
+    if (!token) {
+        const url = new URL('/login', request.url);
+        url.searchParams.set('from', pathname);
         return NextResponse.redirect(url);
     }
 

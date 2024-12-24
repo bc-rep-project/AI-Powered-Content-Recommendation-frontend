@@ -4,6 +4,8 @@ export const API_ENDPOINTS = {
   // Auth endpoints
   register: `${API_BASE_URL}/auth/register`,
   login: `${API_BASE_URL}/auth/login`,
+  googleAuth: `${API_BASE_URL}/auth/google`,
+  googleCallback: `${API_BASE_URL}/auth/google/callback`,
   
   // Content endpoints
   recommendations: `${API_BASE_URL}/recommendations`,
