@@ -18,38 +18,46 @@ export interface AuthResponse {
 
 export const authService = {
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await fetch(API_ENDPOINTS.register, {
-      method: 'POST',
-      headers: {
-        ...API_HEADERS,
-      },
-      body: JSON.stringify({
-        username: data.username,
-        email: data.email,
-        password: data.password
-      }),
-    });
+    try {
+      const response = await fetch(API_ENDPOINTS.register, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+          username: data.username,
+          email: data.email,
+          password: data.password
+        }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.detail || 'Registration failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || 'Registration failed');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
   async login(loginData: LoginData): Promise<AuthResponse> {
     try {
-      // Convert the form data to match FastAPI's OAuth2 password flow
       const formData = new URLSearchParams();
-      formData.append('username', loginData.username); // Using email as username
+      formData.append('username', loginData.username);
       formData.append('password', loginData.password);
 
       const response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
         },
+        mode: 'cors',
         body: formData,
       });
 

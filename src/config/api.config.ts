@@ -15,10 +15,10 @@ export const API_ENDPOINTS = {
 export const API_HEADERS = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
-  'Origin': 'https://ai-powered-content-recommendation-frontend.vercel.app'
 };
 
 export const getAuthHeader = (token: string) => ({
-  Authorization: `Bearer ${token}`,
-  'Origin': 'https://ai-powered-content-recommendation-frontend.vercel.app'
+  'Authorization': `Bearer ${token}`,
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
 }); 

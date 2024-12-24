@@ -10,20 +10,23 @@ export function middleware(request: NextRequest) {
 
     // Handle preflight requests
     if (request.method === 'OPTIONS') {
-        const response = new NextResponse(null, { status: 204 });
-        response.headers.set('Access-Control-Allow-Origin', 'https://ai-powered-content-recommendation-frontend.vercel.app');
-        response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-        response.headers.set('Access-Control-Allow-Headers', '*');
-        response.headers.set('Access-Control-Max-Age', '86400');
-        return response;
+        return new NextResponse(null, {
+            status: 204,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+                'Access-Control-Max-Age': '86400',
+            },
+        });
     }
 
     // For API routes, just add CORS headers
     if (request.nextUrl.pathname.startsWith('/api/')) {
         const response = NextResponse.next();
-        response.headers.set('Access-Control-Allow-Origin', 'https://ai-powered-content-recommendation-frontend.vercel.app');
+        response.headers.set('Access-Control-Allow-Origin', '*');
         response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-        response.headers.set('Access-Control-Allow-Headers', '*');
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
         return response;
     }
 
