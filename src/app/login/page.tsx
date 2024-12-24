@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { authService } from '@/services/auth.service';
 
 export default function Login() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
@@ -19,26 +20,13 @@ export default function Login() {
     setError(null);
 
     try {
-      const formBody = new URLSearchParams();
-      formBody.append('username', formData.username);
-      formBody.append('password', formData.password);
-
-      const response = await fetch('https://ai-recommendation-api.onrender.com/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formBody,
+      const response = await authService.login({
+        email: formData.email,
+        password: formData.password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Login failed');
-      }
-
       // Store the token
-      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('token', response.access_token);
       
       // Redirect to dashboard
       router.push('/dashboard');
@@ -65,18 +53,18 @@ export default function Login() {
           )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="username" className="sr-only">
+              <label htmlFor="email" className="sr-only">
                 Email address
               </label>
               <input
-                id="username"
-                name="username"
+                id="email"
+                name="email"
                 type="email"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
             <div>
@@ -115,12 +103,12 @@ export default function Login() {
         </form>
 
         <div className="text-center">
-          <a
+          <Link
             href="/register"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
             Don't have an account? Register
-          </a>
+          </Link>
         </div>
       </div>
     </div>

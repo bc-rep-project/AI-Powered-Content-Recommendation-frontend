@@ -7,7 +7,7 @@ export interface RegisterData {
 }
 
 export interface LoginData {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -45,11 +45,11 @@ export const authService = {
     }
   },
 
-  async login(loginData: LoginData): Promise<AuthResponse> {
+  async login(data: LoginData): Promise<AuthResponse> {
     try {
       const formData = new URLSearchParams();
-      formData.append('username', loginData.username);
-      formData.append('password', loginData.password);
+      formData.append('username', data.email);
+      formData.append('password', data.password);
 
       const response = await fetch(API_ENDPOINTS.login, {
         method: 'POST',
