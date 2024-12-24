@@ -16,6 +16,16 @@ export interface AuthResponse {
   token_type: string;
 }
 
+export interface GoogleAuthResponse {
+  access_token: string;
+  token_type: string;
+  user: {
+    email: string;
+    name: string;
+    picture?: string;
+  };
+}
+
 export const authService = {
   async register(data: RegisterData): Promise<AuthResponse> {
     try {
@@ -77,6 +87,31 @@ export const authService = {
       console.error('Login error:', error);
       throw error;
     }
+  },
+
+  async loginWithGoogle(): Promise<void> {
+    const googleAuthUrl = `${API_ENDPOINTS.googleAuth}?redirect_uri=${encodeURIComponent(window.location.origin + '/auth/google/callback')}`;
+    const popup = window.open(googleAuthUrl, 'Google Sign In', 'width=500,height=600');
+
+    if (!popup) {
+      throw new Error('Failed to open Google sign in popup. Please allow popups for this site.');
+    }
+
+    return new Promise((resolve, reject) => {
+      window.addEventListener('message', async function handleMessage(event) {
+        if (event.origin !== window.location.origin) return;
+        if (event.data.type === 'google_auth_success') {
+          window.removeEventListener('message', handleMessage);
+          try {
+            const { access_token } = event.data;
+            localStorage.setItem('auth_token', access_token);
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }
+      });
+    });
   },
 
   logout() {
