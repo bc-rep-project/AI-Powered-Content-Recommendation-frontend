@@ -14,7 +14,7 @@ export default function DashboardPage() {
   const searchParams = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     const handleAuth = async () => {
       try {
@@ -91,12 +91,12 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold text-gray-800">Content Recommendations</h1>
           <div className="flex items-center space-x-4">
             <span className="text-gray-600">{user.email}</span>
-            <button
-              onClick={handleLogout}
+          <button
+            onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-            >
-              Logout
-            </button>
+          >
+            Logout
+          </button>
           </div>
         </div>
       </nav>
@@ -114,7 +114,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-      </div>
+          </div>
     </div>
   );
 } 
