@@ -97,32 +97,44 @@ export const authService = {
       throw new Error('Failed to open Google sign in popup. Please allow popups for this site.');
     }
 
-    return new Promise((resolve, reject) => {
-      window.addEventListener('message', async function handleMessage(event) {
-        // Check if the message is from our backend domain
-        if (!event.origin.includes('ai-recommendation-api.onrender.com')) return;
-
-        try {
-          const { access_token, user } = event.data;
-          if (access_token) {
-            localStorage.setItem('auth_token', access_token);
-            localStorage.setItem('user', JSON.stringify(user));
-            window.removeEventListener('message', handleMessage);
-            popup.close();
-            resolve();
-          }
-        } catch (error) {
-          reject(error);
-        }
-      });
-
-      // Handle popup closed
+    return new Promise<void>((resolve, reject) => {
       const checkPopup = setInterval(() => {
-        if (!popup || popup.closed) {
-          clearInterval(checkPopup);
-          reject(new Error('Authentication cancelled'));
+        try {
+          if (!popup || popup.closed) {
+            clearInterval(checkPopup);
+            reject(new Error('Authentication cancelled'));
+            return;
+          }
+
+          const currentUrl = popup.location.href;
+          if (currentUrl.includes('/dashboard')) {
+            const params = new URLSearchParams(new URL(currentUrl).search);
+            const access_token = params.get('access_token');
+            const user = params.get('user');
+
+            if (access_token) {
+              localStorage.setItem('auth_token', access_token);
+              if (user) {
+                localStorage.setItem('user', JSON.stringify({ email: user }));
+              }
+              popup.close();
+              clearInterval(checkPopup);
+              resolve();
+            }
+          }
+        } catch (err: any) {
+          if (!err.toString().includes('cross-origin')) {
+            clearInterval(checkPopup);
+            reject(err);
+          }
         }
-      }, 1000);
+      }, 500);
+
+      setTimeout(() => {
+        clearInterval(checkPopup);
+        popup.close();
+        reject(new Error('Authentication timeout'));
+      }, 120000);
     });
   },
 
