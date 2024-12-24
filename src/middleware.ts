@@ -2,31 +2,41 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    // Check for token in both cookie and localStorage
-    const token = request.cookies.get('auth_token')?.value || 
-                 (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null);
+    // Check for token in cookies
+    const token = request.cookies.get('auth_token')?.value;
                  
     const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
                       request.nextUrl.pathname.startsWith('/register');
 
-    // Add CORS headers to all responses
-    const response = NextResponse.next();
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
-    response.headers.set('Access-Control-Allow-Origin', 'https://ai-powered-content-recommendation-frontend.vercel.app');
-    response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    response.headers.set('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+    // Handle preflight requests
+    if (request.method === 'OPTIONS') {
+        const response = new NextResponse(null, { status: 204 });
+        response.headers.set('Access-Control-Allow-Origin', 'https://ai-powered-content-recommendation-frontend.vercel.app');
+        response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+        response.headers.set('Access-Control-Allow-Headers', '*');
+        response.headers.set('Access-Control-Max-Age', '86400');
+        return response;
+    }
 
-    if (!token && !isAuthPage) {
-        // Redirect to login if accessing protected route without token
+    // For API routes, just add CORS headers
+    if (request.nextUrl.pathname.startsWith('/api/')) {
+        const response = NextResponse.next();
+        response.headers.set('Access-Control-Allow-Origin', 'https://ai-powered-content-recommendation-frontend.vercel.app');
+        response.headers.set('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+        response.headers.set('Access-Control-Allow-Headers', '*');
+        return response;
+    }
+
+    // Handle authentication redirects
+    if (!token && !isAuthPage && request.nextUrl.pathname !== '/') {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
     if (token && isAuthPage) {
-        // Redirect to dashboard if accessing auth pages while logged in
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    return response;
+    return NextResponse.next();
 }
 
 export const config = {

@@ -25,7 +25,11 @@ export const authService = {
         'Origin': 'https://ai-powered-content-recommendation-frontend.vercel.app'
       },
       credentials: 'include',
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        username: data.username,
+        email: data.email,
+        password: data.password
+      }),
     });
 
     if (!response.ok) {
@@ -38,9 +42,9 @@ export const authService = {
 
   async login(loginData: LoginData): Promise<AuthResponse> {
     try {
+      // For FastAPI's OAuth2 password flow
       const formData = new URLSearchParams();
-      formData.append('grant_type', 'password');
-      formData.append('username', loginData.username);
+      formData.append('username', loginData.username); // Using email as username
       formData.append('password', loginData.password);
 
       const response = await fetch(API_ENDPOINTS.login, {
@@ -48,10 +52,8 @@ export const authService = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json',
-          'Origin': 'https://ai-powered-content-recommendation-frontend.vercel.app'
         },
-        credentials: 'include',
-        body: formData.toString(),
+        body: formData,
       });
 
       if (!response.ok) {
