@@ -22,9 +22,7 @@ export const authService = {
       method: 'POST',
       headers: {
         ...API_HEADERS,
-        'Origin': 'https://ai-powered-content-recommendation-frontend.vercel.app'
       },
-      credentials: 'include',
       body: JSON.stringify({
         username: data.username,
         email: data.email,
@@ -42,7 +40,7 @@ export const authService = {
 
   async login(loginData: LoginData): Promise<AuthResponse> {
     try {
-      // For FastAPI's OAuth2 password flow
+      // Convert the form data to match FastAPI's OAuth2 password flow
       const formData = new URLSearchParams();
       formData.append('username', loginData.username); // Using email as username
       formData.append('password', loginData.password);
@@ -51,16 +49,15 @@ export const authService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json',
         },
         body: formData,
       });
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
         if (response.status === 401) {
           throw new Error('Invalid email or password');
         }
-        const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.detail || 'Login failed');
       }
 
