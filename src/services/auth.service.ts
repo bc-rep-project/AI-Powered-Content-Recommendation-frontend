@@ -79,6 +79,55 @@ export const authService = {
     }
   },
 
+  async loginWithGoogle(): Promise<void> {
+    const googleAuthUrl = `${API_ENDPOINTS.googleAuth}`;
+    const popup = window.open(googleAuthUrl, 'Google Sign In', 'width=500,height=600');
+
+    if (!popup) {
+      throw new Error('Failed to open Google sign in popup. Please allow popups for this site.');
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const checkPopup = setInterval(() => {
+        try {
+          if (!popup || popup.closed) {
+            clearInterval(checkPopup);
+            reject(new Error('Authentication cancelled'));
+            return;
+          }
+
+          const currentUrl = popup.location.href;
+          if (currentUrl.includes('/dashboard')) {
+            const params = new URLSearchParams(new URL(currentUrl).search);
+            const access_token = params.get('access_token');
+            const user = params.get('user');
+
+            if (access_token) {
+              localStorage.setItem('auth_token', access_token);
+              if (user) {
+                localStorage.setItem('user', JSON.stringify({ email: user }));
+              }
+              popup.close();
+              clearInterval(checkPopup);
+              resolve();
+            }
+          }
+        } catch (err: any) {
+          if (!err.toString().includes('cross-origin')) {
+            clearInterval(checkPopup);
+            reject(err);
+          }
+        }
+      }, 500);
+
+      setTimeout(() => {
+        clearInterval(checkPopup);
+        popup.close();
+        reject(new Error('Authentication timeout'));
+      }, 120000);
+    });
+  },
+
   logout() {
     localStorage.removeItem('auth_token');
   },
