@@ -2,19 +2,32 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    const token = request.cookies.get('auth_token');
-    const isAuthPage = request.nextUrl.pathname === '/auth/google/callback';
-    const isApiRequest = request.nextUrl.pathname.startsWith('/api');
+    // Get the pathname
+    const pathname = request.nextUrl.pathname;
 
-    // Allow API requests and auth callback to pass through
-    if (isApiRequest || isAuthPage) {
+    // Skip middleware for these paths
+    if (
+        pathname.startsWith('/_next') || // Next.js system paths
+        pathname.startsWith('/api') ||   // API routes
+        pathname.startsWith('/auth') ||  // Auth routes
+        pathname.match(/\.(ico|png|jpg|jpeg|svg|gif)$/) // Static files
+    ) {
         return NextResponse.next();
     }
 
-    // If not authenticated, redirect to Google auth
-    if (!token) {
-        const googleAuthUrl = 'https://ai-recommendation-api.onrender.com/api/v1/auth/google';
-        return NextResponse.redirect(googleAuthUrl);
+    // Check for auth token
+    const token = request.cookies.get('auth_token');
+    
+    // If no token and not already on login page, redirect to login
+    if (!token && pathname !== '/login') {
+        const url = new URL('/login', request.url);
+        return NextResponse.redirect(url);
+    }
+
+    // If has token and on login page, redirect to dashboard
+    if (token && pathname === '/login') {
+        const url = new URL('/dashboard', request.url);
+        return NextResponse.redirect(url);
     }
 
     return NextResponse.next();
@@ -22,6 +35,14 @@ export function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        /*
+         * Match all request paths except:
+         * 1. /api/ routes
+         * 2. /_next/ (Next.js internals)
+         * 3. /auth/ (auth routes)
+         * 4. /static (public files)
+         * 5. all root files like favicon.ico, robots.txt, etc.
+         */
+        '/((?!api|_next|auth|static|.*\\.[\\w]+$).*)',
     ],
 }; 
