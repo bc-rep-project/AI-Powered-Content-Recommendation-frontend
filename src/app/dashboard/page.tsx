@@ -1,87 +1,89 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
-interface User {
-  email: string;
-  picture?: string;
-  provider?: string;
+interface Recommendation {
+  id: string;
+  title: string;
+  description: string;
+  score: number;
+  category?: string;
+  image_url?: string;
 }
 
-export default function DashboardPage() {
+export default function Dashboard() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleAuth = async () => {
+    const fetchRecommendations = async () => {
       try {
-        // Handle OAuth callback parameters
-        const access_token = searchParams.get('access_token');
-        const userEmail = searchParams.get('user');
-        const provider = searchParams.get('provider');
+        // Get token from localStorage
+        const token = localStorage.getItem('token');
         
-        if (access_token) {
-          // Store the token and user info
-          localStorage.setItem('auth_token', access_token);
-          if (userEmail) {
-            const userData = { 
-              email: userEmail,
-              provider: provider || undefined
-            };
-            localStorage.setItem('user', JSON.stringify(userData));
-            setUser(userData);
-          }
-          
-          // Clean up URL parameters
-          router.replace('/dashboard');
-        } else {
-          // Check if user is already authenticated
-          const storedToken = localStorage.getItem('auth_token');
-          const storedUser = localStorage.getItem('user');
-          
-          if (!storedToken || !storedUser) {
-            router.replace('/login');
+        if (!token) {
+          router.push('/login');
+          return;
+        }
+
+        const response = await fetch('https://ai-recommendation-api.onrender.com/api/v1/recommendations', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem('token');
+            router.push('/login');
             return;
           }
-          
-          try {
-            setUser(JSON.parse(storedUser));
-          } catch (error) {
-            console.error('Error parsing stored user:', error);
-            router.replace('/login');
-          }
+          throw new Error('Failed to fetch recommendations');
         }
-        
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Authentication error:', error);
-        router.replace('/login');
+
+        const data = await response.json();
+        setRecommendations(data.recommendations || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
       }
     };
 
-    handleAuth();
-  }, [searchParams, router]);
+    fetchRecommendations();
+  }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    router.replace('/login');
+    localStorage.removeItem('token');
+    router.push('/login');
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
-  if (!user) {
-    router.replace('/login');
-    return null;
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>{error}</p>
+        </div>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -89,32 +91,55 @@ export default function DashboardPage() {
       <nav className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <h1 className="text-xl font-bold text-gray-800">Content Recommendations</h1>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-600">{user.email}</span>
           <button
             onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
           >
             Logout
           </button>
-          </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Welcome to your Dashboard</h2>
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4">Your Profile</h3>
-            <div className="space-y-4">
-              <p><span className="font-medium">Email:</span> {user.email}</p>
-              {user.provider && (
-                <p><span className="font-medium">Sign in method:</span> {user.provider}</p>
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {recommendations.map((recommendation) => (
+            <div
+              key={recommendation.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden"
+              data-testid="recommendation-item"
+            >
+              {recommendation.image_url && (
+                <img
+                  src={recommendation.image_url}
+                  alt={recommendation.title}
+                  className="w-full h-48 object-cover"
+                />
               )}
+              <div className="p-4">
+                <h2 className="text-xl font-semibold mb-2">{recommendation.title}</h2>
+                <p className="text-gray-600 mb-2">{recommendation.description}</p>
+                {recommendation.category && (
+                  <span 
+                    className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm"
+                    data-testid="category-badge"
+                  >
+                    {recommendation.category}
+                  </span>
+                )}
+                <div className="mt-2 text-sm text-gray-500">
+                  Score: {(recommendation.score * 100).toFixed(1)}%
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
+
+        {recommendations.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No recommendations available yet.</p>
           </div>
+        )}
+      </main>
     </div>
   );
 } 

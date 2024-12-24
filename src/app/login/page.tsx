@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/services/auth.service';
-import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Login() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
@@ -20,30 +19,31 @@ export default function Login() {
     setError(null);
 
     try {
-      const response = await authService.login({
-        email: formData.email,
-        password: formData.password,
+      const formBody = new URLSearchParams();
+      formBody.append('username', formData.username);
+      formBody.append('password', formData.password);
+
+      const response = await fetch('https://ai-recommendation-api.onrender.com/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formBody,
       });
 
-      // Token is already stored by authService
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Login failed');
+      }
+
+      // Store the token
+      localStorage.setItem('token', data.access_token);
+      
       // Redirect to dashboard
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await authService.loginWithGoogle();
-      router.push('/dashboard');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Google sign in failed');
     } finally {
       setLoading(false);
     }
@@ -57,54 +57,26 @@ export default function Login() {
             Sign in to your account
           </h2>
         </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            {error}
-          </div>
-        )}
-
-        <div className="mt-8">
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <Image
-              src="/google-icon.svg"
-              alt="Google"
-              width={20}
-              height={20}
-              className="mr-2"
-            />
-            Sign in with Google
-          </button>
-        </div>
-
-        <div className="mt-6 relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
-          </div>
-        </div>
-
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+              {error}
+            </div>
+          )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
+              <label htmlFor="username" className="sr-only">
                 Email address
               </label>
               <input
-                id="email"
-                name="email"
+                id="username"
+                name="username"
                 type="email"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               />
             </div>
             <div>
@@ -137,7 +109,7 @@ export default function Login() {
                   <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
                 </span>
               ) : null}
-              {loading ? 'Signing in...' : 'Sign in with Email'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>
