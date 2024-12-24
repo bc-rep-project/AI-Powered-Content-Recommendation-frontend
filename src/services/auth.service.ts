@@ -55,7 +55,6 @@ export const authService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json',
         },
         mode: 'cors',
         body: formData,
@@ -79,4 +78,16 @@ export const authService = {
       throw error;
     }
   },
+
+  logout() {
+    localStorage.removeItem('auth_token');
+  },
+
+  getToken(): string | null {
+    return localStorage.getItem('auth_token');
+  },
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
 }; 

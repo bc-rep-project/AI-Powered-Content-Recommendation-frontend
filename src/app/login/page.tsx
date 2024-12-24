@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { authService } from '@/services/auth.service';
 
 export default function Login() {
@@ -25,9 +24,7 @@ export default function Login() {
         password: formData.password,
       });
 
-      // Store the token
-      localStorage.setItem('token', response.access_token);
-      
+      // Token is already stored by authService
       // Redirect to dashboard
       router.push('/dashboard');
     } catch (err) {
@@ -103,12 +100,12 @@ export default function Login() {
         </form>
 
         <div className="text-center">
-          <Link
+          <a
             href="/register"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
             Don't have an account? Register
-          </Link>
+          </a>
         </div>
       </div>
     </div>
