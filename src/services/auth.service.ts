@@ -90,7 +90,7 @@ export const authService = {
   },
 
   async loginWithGoogle(): Promise<void> {
-    const googleAuthUrl = `${API_ENDPOINTS.googleAuth}?redirect_uri=${encodeURIComponent(window.location.origin + '/auth/google/callback')}`;
+    const googleAuthUrl = `${API_ENDPOINTS.googleAuth}`;
     const popup = window.open(googleAuthUrl, 'Google Sign In', 'width=500,height=600');
 
     if (!popup) {
@@ -99,18 +99,30 @@ export const authService = {
 
     return new Promise((resolve, reject) => {
       window.addEventListener('message', async function handleMessage(event) {
-        if (event.origin !== window.location.origin) return;
-        if (event.data.type === 'google_auth_success') {
-          window.removeEventListener('message', handleMessage);
-          try {
-            const { access_token } = event.data;
+        // Check if the message is from our backend domain
+        if (!event.origin.includes('ai-recommendation-api.onrender.com')) return;
+
+        try {
+          const { access_token, user } = event.data;
+          if (access_token) {
             localStorage.setItem('auth_token', access_token);
+            localStorage.setItem('user', JSON.stringify(user));
+            window.removeEventListener('message', handleMessage);
+            popup.close();
             resolve();
-          } catch (error) {
-            reject(error);
           }
+        } catch (error) {
+          reject(error);
         }
       });
+
+      // Handle popup closed
+      const checkPopup = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(checkPopup);
+          reject(new Error('Authentication cancelled'));
+        }
+      }, 1000);
     });
   },
 
