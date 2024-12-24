@@ -2,18 +2,19 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    const token = request.cookies.get('token')?.value;
-    const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
-                      request.nextUrl.pathname.startsWith('/register');
+    const token = request.cookies.get('auth_token');
+    const isAuthPage = request.nextUrl.pathname === '/auth/google/callback';
+    const isApiRequest = request.nextUrl.pathname.startsWith('/api');
 
-    if (!token && !isAuthPage) {
-        // Redirect to login if accessing protected route without token
-        return NextResponse.redirect(new URL('/login', request.url));
+    // Allow API requests and auth callback to pass through
+    if (isApiRequest || isAuthPage) {
+        return NextResponse.next();
     }
 
-    if (token && isAuthPage) {
-        // Redirect to dashboard if accessing auth pages while logged in
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+    // If not authenticated, redirect to Google auth
+    if (!token) {
+        const googleAuthUrl = 'https://ai-recommendation-api.onrender.com/api/v1/auth/google';
+        return NextResponse.redirect(googleAuthUrl);
     }
 
     return NextResponse.next();
@@ -21,8 +22,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/dashboard/:path*',
-        '/login',
-        '/register'
-    ]
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    ],
 }; 
