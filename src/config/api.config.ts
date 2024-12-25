@@ -13,6 +13,12 @@ export const API_ENDPOINTS = {
   
   // Content endpoints
   recommendations: `${API_BASE_URL}/recommendations`,
+  explore: `${API_BASE_URL}/content/explore`,
+  favorites: `${API_BASE_URL}/user/favorites`,
+  settings: `${API_BASE_URL}/user/settings`,
+
+  // Search endpoint
+  search: `${API_BASE_URL}/content/search`,
   
   // Health check
   health: 'https://ai-recommendation-api.onrender.com/health'

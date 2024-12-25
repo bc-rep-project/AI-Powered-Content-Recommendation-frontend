@@ -54,15 +54,37 @@ export default function ExplorePage() {
     fetchContent();
   }, []);
 
-  const fetchContent = async () => {
+  const fetchContent = async (retryCount = 0) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
       const response = await fetch(API_ENDPOINTS.explore);
-      if (!response.ok) throw new Error('Failed to fetch content');
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Content service is temporarily unavailable');
+        }
+        throw new Error('Failed to fetch content');
+      }
       const data = await response.json();
       setContent(data);
     } catch (err) {
-      setError('Failed to load content');
-      // Use placeholder data for now
+      console.error('Error fetching content:', err);
+      setError(
+        retryCount < 3 
+          ? 'Failed to load content. Retrying...' 
+          : 'Failed to load content. Please try again later.'
+      );
+      
+      // Retry logic with exponential backoff
+      if (retryCount < 3) {
+        setTimeout(() => {
+          fetchContent(retryCount + 1);
+        }, Math.pow(2, retryCount) * 1000); // 1s, 2s, 4s delays
+        return;
+      }
+
+      // Use placeholder data if all retries fail
       setContent([
         {
           id: '1',
@@ -273,8 +295,14 @@ export default function ExplorePage() {
         </div>
 
         {error && (
-          <div className="mb-8 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-            {error}
+          <div className="mb-8 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center justify-between">
+            <span>{error}</span>
+            <button
+              onClick={() => fetchContent()}
+              className="ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Retry
+            </button>
           </div>
         )}
 
