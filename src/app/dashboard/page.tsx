@@ -13,13 +13,38 @@ interface Content {
   tags: string[];
 }
 
+interface Filters {
+  category: string;
+  minRating: number;
+  tags: string[];
+}
+
+const CATEGORIES = ['All', 'Technology', 'Science', 'Business', 'Arts', 'Health'];
+const RATINGS = [1, 2, 3, 4, 5];
+
 export default function DashboardPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Content[]>([]);
   const [recommendations, setRecommendations] = useState<Content[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<Filters>({
+    category: 'All',
+    minRating: 0,
+    tags: [],
+  });
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  // Extract unique tags from content
+  useEffect(() => {
+    const tags = new Set<string>();
+    [...recommendations, ...searchResults].forEach(item => {
+      item.tags.forEach(tag => tags.add(tag));
+    });
+    setAvailableTags(Array.from(tags));
+  }, [recommendations, searchResults]);
 
   // Fetch initial recommendations
   useEffect(() => {
@@ -52,7 +77,22 @@ export default function DashboardPage() {
           tags: ['Python', 'Data Science'],
           rating: 4.8
         },
-        // Add more placeholder items as needed
+        {
+          id: '3',
+          title: 'Business Analytics',
+          description: 'Learn business analytics fundamentals',
+          category: 'Business',
+          tags: ['Analytics', 'Business', 'Data'],
+          rating: 4.2
+        },
+        {
+          id: '4',
+          title: 'Digital Art Fundamentals',
+          description: 'Master the basics of digital art',
+          category: 'Arts',
+          tags: ['Art', 'Digital', 'Creative'],
+          rating: 4.6
+        },
       ]);
     }
   };
@@ -65,7 +105,14 @@ export default function DashboardPage() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.recommendations}/search?q=${encodeURIComponent(searchQuery)}`);
+      const queryParams = new URLSearchParams({
+        q: searchQuery,
+        category: filters.category !== 'All' ? filters.category : '',
+        minRating: filters.minRating.toString(),
+        tags: filters.tags.join(','),
+      });
+
+      const response = await fetch(`${API_ENDPOINTS.recommendations}/search?${queryParams}`);
       if (!response.ok) throw new Error('Search failed');
       
       const data = await response.json();
@@ -78,8 +125,33 @@ export default function DashboardPage() {
     }
   };
 
+  const handleFilterChange = (filterType: keyof Filters, value: any) => {
+    setFilters(prev => ({ ...prev, [filterType]: value }));
+  };
+
+  const toggleTag = (tag: string) => {
+    setFilters(prev => ({
+      ...prev,
+      tags: prev.tags.includes(tag)
+        ? prev.tags.filter(t => t !== tag)
+        : [...prev.tags, tag]
+    }));
+  };
+
+  // Apply filters to content
+  const filterContent = (content: Content[]) => {
+    return content.filter(item => {
+      const categoryMatch = filters.category === 'All' || item.category === filters.category;
+      const ratingMatch = !item.rating || item.rating >= filters.minRating;
+      const tagsMatch = filters.tags.length === 0 || 
+        filters.tags.every(tag => item.tags.includes(tag));
+      
+      return categoryMatch && ratingMatch && tagsMatch;
+    });
+  };
+
   // Determine which content to show
-  const displayContent = searchQuery ? searchResults : recommendations;
+  const displayContent = filterContent(searchQuery ? searchResults : recommendations);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -203,16 +275,114 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {searchQuery ? 'Search Results' : 'Your Recommendations'}
-          </h1>
-          <p className="mt-2 text-gray-600">
-            {searchQuery 
-              ? `Showing results for "${searchQuery}"`
-              : 'Personalized content based on your interests'
-            }
-          </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {searchQuery ? 'Search Results' : 'Your Recommendations'}
+            </h1>
+            <p className="mt-2 text-gray-600">
+              {searchQuery 
+                ? `Showing results for "${searchQuery}"`
+                : 'Personalized content based on your interests'
+              }
+            </p>
+          </div>
+          
+          {/* Filter Toggle Button */}
+          <button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="mt-4 md:mt-0 flex items-center text-gray-600 hover:text-blue-600"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            Filters
+          </button>
+        </div>
+
+        {/* Filters Panel */}
+        <div className={`bg-white rounded-lg shadow-md p-6 mb-8 ${isFilterOpen ? 'block' : 'hidden'}`}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+              <select
+                value={filters.category}
+                onChange={(e) => handleFilterChange('category', e.target.value)}
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
+              >
+                {CATEGORIES.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Rating Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Minimum Rating
+              </label>
+              <div className="flex items-center space-x-2">
+                {RATINGS.map(rating => (
+                  <button
+                    key={rating}
+                    onClick={() => handleFilterChange('minRating', rating)}
+                    className={`p-2 rounded-md ${
+                      filters.minRating === rating
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {rating}★
+                  </button>
+                ))}
+                <button
+                  onClick={() => handleFilterChange('minRating', 0)}
+                  className={`p-2 rounded-md ${
+                    filters.minRating === 0
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Any
+                </button>
+              </div>
+            </div>
+
+            {/* Tags Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tags
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {availableTags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      filters.tags.includes(tag)
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Actions */}
+          <div className="mt-6 flex justify-end space-x-4">
+            <button
+              onClick={() => setFilters({ category: 'All', minRating: 0, tags: [] })}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -220,6 +390,12 @@ export default function DashboardPage() {
             {error}
           </div>
         )}
+
+        {/* Results Summary */}
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {displayContent.length} {displayContent.length === 1 ? 'result' : 'results'}
+          {(filters.category !== 'All' || filters.minRating > 0 || filters.tags.length > 0) && ' with filters'}
+        </div>
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -266,14 +442,22 @@ export default function DashboardPage() {
         </div>
 
         {/* No Results Message */}
-        {searchQuery && searchResults.length === 0 && !isSearching && !error && (
+        {displayContent.length === 0 && !isSearching && !error && (
           <div className="text-center py-12">
-            <p className="text-gray-600">No results found for "{searchQuery}"</p>
+            <p className="text-gray-600">
+              {searchQuery 
+                ? `No results found for "${searchQuery}"`
+                : 'No content matches the selected filters'
+              }
+            </p>
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                setSearchQuery('');
+                setFilters({ category: 'All', minRating: 0, tags: [] });
+              }}
               className="mt-4 text-blue-600 hover:text-blue-700"
             >
-              Clear search
+              Clear all filters
             </button>
           </div>
         )}
