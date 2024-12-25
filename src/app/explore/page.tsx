@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API_ENDPOINTS, handleApiError, ApiResponse } from '@/config/api.config';
+import { API_ENDPOINTS, handleApiError, ApiResponse, apiFetch } from '@/config/api.config';
 
 interface Content {
   id: string;
@@ -59,16 +59,7 @@ export default function ExplorePage() {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch(API_ENDPOINTS.explore);
-      if (!response.ok) {
-        throw new Error('Content service is temporarily unavailable');
-      }
-      
-      const data: ApiResponse<Content[]> = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to fetch content');
-      }
-      
+      const data = await apiFetch<Content[]>(API_ENDPOINTS.explore);
       setContent(data.data || []);
     } catch (err) {
       console.error('Error fetching content:', err);

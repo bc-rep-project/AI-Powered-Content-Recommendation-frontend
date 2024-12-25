@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API_ENDPOINTS } from '@/config/api.config';
+import { API_ENDPOINTS, handleApiError, ApiResponse, apiFetch } from '@/config/api.config';
 
 interface Content {
   id: string;
@@ -53,12 +53,10 @@ export default function DashboardPage() {
 
   const fetchRecommendations = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.recommendations);
-      if (!response.ok) throw new Error('Failed to fetch recommendations');
-      const data = await response.json();
-      setRecommendations(data);
+      const data = await apiFetch<Content[]>(API_ENDPOINTS.recommendations);
+      setRecommendations(data.data || []);
     } catch (err) {
-      setError('Failed to load recommendations');
+      setError(handleApiError(err));
       // Use placeholder data for now
       setRecommendations([
         {
@@ -112,13 +110,10 @@ export default function DashboardPage() {
         tags: filters.tags.join(','),
       });
 
-      const response = await fetch(`${API_ENDPOINTS.recommendations}/search?${queryParams}`);
-      if (!response.ok) throw new Error('Search failed');
-      
-      const data = await response.json();
-      setSearchResults(data);
+      const data = await apiFetch<Content[]>(`${API_ENDPOINTS.search}?${queryParams}`);
+      setSearchResults(data.data || []);
     } catch (err) {
-      setError('Search failed. Please try again.');
+      setError(handleApiError(err));
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -459,7 +454,7 @@ export default function DashboardPage() {
             >
               Clear all filters
             </button>
-          </div>
+      </div>
         )}
       </main>
     </div>

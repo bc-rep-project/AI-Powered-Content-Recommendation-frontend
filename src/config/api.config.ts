@@ -1,4 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-recommendation-api.onrender.com/api/v1';
+const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://ai-powered-content-recommendation-frontend.vercel.app';
 
 export const API_ENDPOINTS = {
   // Auth endpoints
@@ -20,21 +21,57 @@ export const API_ENDPOINTS = {
   health: `${API_BASE_URL}/health`
 } as const;
 
-export const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://ai-powered-content-recommendation-frontend.vercel.app';
-
 export const AUTH_ENDPOINTS = {
   frontendGoogleAuth: '/auth/google',
   frontendGoogleCallback: '/api/auth/google/callback'
 } as const;
 
+// Default headers for all requests
 export const API_HEADERS = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
+  'Origin': FRONTEND_URL,
 };
 
+// Default fetch options
+export const DEFAULT_FETCH_OPTIONS: RequestInit = {
+  credentials: 'include', // Include cookies for cross-origin requests
+  headers: API_HEADERS,
+  mode: 'cors', // Enable CORS
+};
+
+// Get auth headers with token
 export const getAuthHeader = (token: string) => ({
-  Authorization: `Bearer ${token}`
+  ...API_HEADERS,
+  'Authorization': `Bearer ${token}`
 });
+
+// Fetch wrapper with default options
+export const apiFetch = async <T>(
+  url: string, 
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> => {
+  try {
+    const response = await fetch(url, {
+      ...DEFAULT_FETCH_OPTIONS,
+      ...options,
+      headers: {
+        ...DEFAULT_FETCH_OPTIONS.headers,
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('API fetch error:', error);
+    throw error;
+  }
+};
 
 // Error handling utilities
 export const handleApiError = (error: any): string => {
