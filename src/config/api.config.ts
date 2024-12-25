@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-recommendation-api.onrender.com/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-recommendation-api.onrender.com';
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://ai-powered-content-recommendation-frontend.vercel.app';
 
 export const API_ENDPOINTS = {
@@ -46,23 +46,33 @@ export const getAuthHeader = (token: string) => ({
   'Authorization': `Bearer ${token}`
 });
 
-// Fetch wrapper with default options
+// Fetch wrapper with default options and optional auth
 export const apiFetch = async <T>(
   url: string, 
-  options: RequestInit = {}
+  options: RequestInit = {},
+  token?: string
 ): Promise<ApiResponse<T>> => {
   try {
+    const headers = token 
+      ? { ...DEFAULT_FETCH_OPTIONS.headers, ...getAuthHeader(token) }
+      : DEFAULT_FETCH_OPTIONS.headers;
+
     const response = await fetch(url, {
       ...DEFAULT_FETCH_OPTIONS,
       ...options,
       headers: {
-        ...DEFAULT_FETCH_OPTIONS.headers,
+        ...headers,
         ...options.headers,
       },
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => null);
+      throw {
+        status: response.status,
+        statusText: response.statusText,
+        data: errorData,
+      };
     }
 
     const data = await response.json();
@@ -75,9 +85,9 @@ export const apiFetch = async <T>(
 
 // Error handling utilities
 export const handleApiError = (error: any): string => {
-  if (error.response) {
+  if (error.status) {
     // Server responded with error
-    switch (error.response.status) {
+    switch (error.status) {
       case 404:
         return 'The requested resource was not found';
       case 401:
@@ -87,7 +97,7 @@ export const handleApiError = (error: any): string => {
       case 500:
         return 'Server error. Please try again later';
       default:
-        return error.response.data?.message || 'An unexpected error occurred';
+        return error.data?.message || 'An unexpected error occurred';
     }
   } else if (error.request) {
     // Request made but no response
