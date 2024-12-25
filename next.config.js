@@ -5,9 +5,6 @@ const nextConfig = {
   images: {
     domains: ['ai-recommendation-api.onrender.com'],
   },
-  experimental: {
-    serverActions: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
