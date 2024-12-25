@@ -4,6 +4,13 @@ import { useState } from 'react';
 
 export default function DashboardPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement search functionality
+    console.log('Searching for:', searchQuery);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -12,14 +19,35 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo and Brand */}
-            <div className="flex items-center">
+            <div className="flex items-center flex-shrink-0">
               <a href="/" className="flex items-center">
                 <span className="text-xl font-bold text-blue-600">AI Recommender</span>
               </a>
             </div>
 
+            {/* Search Bar - Desktop */}
+            <div className="hidden md:flex flex-1 justify-center px-6 max-w-2xl">
+              <form onSubmit={handleSearch} className="w-full">
+                <div className="relative">
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search for content..."
+                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+                             focus:ring-blue-500 focus:border-blue-500 block p-2.5 pl-10"
+                  />
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    </svg>
+                  </div>
+                </div>
+              </form>
+            </div>
+
             {/* Navigation Links */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-8 flex-shrink-0">
               <a href="/dashboard" className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                 Dashboard
               </a>
@@ -54,6 +82,28 @@ export default function DashboardPage() {
 
           {/* Mobile Menu */}
           <div className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+            {/* Search Bar - Mobile */}
+            <div className="px-2 pt-2 pb-3">
+              <form onSubmit={handleSearch}>
+                <div className="relative">
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search for content..."
+                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+                             focus:ring-blue-500 focus:border-blue-500 block p-2.5 pl-10"
+                  />
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    </svg>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* Mobile Navigation Links */}
             <div className="px-2 pt-2 pb-3 space-y-1">
               <a href="/dashboard" className="block text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium">
                 Dashboard
