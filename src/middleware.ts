@@ -16,6 +16,10 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // TEMPORARY: Skip auth checks and allow all access
+    return NextResponse.next();
+
+    /* Authentication code commented out for now
     // Check for auth token
     const token = request.cookies.get('auth_token');
     
@@ -35,8 +39,7 @@ export function middleware(request: NextRequest) {
         url.searchParams.set('from', pathname);
         return NextResponse.redirect(url);
     }
-
-    return NextResponse.next();
+    */
 }
 
 export const config = {
