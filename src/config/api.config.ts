@@ -9,8 +9,8 @@ export const API_ENDPOINTS = {
   
   // Content endpoints
   recommendations: `${API_BASE_URL}/recommendations`,
-  explore: `${API_BASE_URL}/content/explore`,
-  search: `${API_BASE_URL}/content/search`,
+  explore: `${API_BASE_URL}/recommendations/explore`,
+  search: `${API_BASE_URL}/recommendations/search`,
   favorites: `${API_BASE_URL}/user/favorites`,
   
   // User settings
@@ -34,4 +34,37 @@ export const API_HEADERS = {
 
 export const getAuthHeader = (token: string) => ({
   Authorization: `Bearer ${token}`
-}); 
+});
+
+// Error handling utilities
+export const handleApiError = (error: any): string => {
+  if (error.response) {
+    // Server responded with error
+    switch (error.response.status) {
+      case 404:
+        return 'The requested resource was not found';
+      case 401:
+        return 'Please login to access this feature';
+      case 403:
+        return 'You do not have permission to access this resource';
+      case 500:
+        return 'Server error. Please try again later';
+      default:
+        return error.response.data?.message || 'An unexpected error occurred';
+    }
+  } else if (error.request) {
+    // Request made but no response
+    return 'Unable to connect to the server. Please check your internet connection';
+  } else {
+    // Error setting up request
+    return 'An error occurred while processing your request';
+  }
+};
+
+// API response type
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+} 

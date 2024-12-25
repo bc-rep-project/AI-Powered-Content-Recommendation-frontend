@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API_ENDPOINTS } from '@/config/api.config';
+import { API_ENDPOINTS, handleApiError, ApiResponse } from '@/config/api.config';
 
 interface Content {
   id: string;
@@ -54,37 +54,27 @@ export default function ExplorePage() {
     fetchContent();
   }, []);
 
-  const fetchContent = async (retryCount = 0) => {
-    setIsLoading(true);
-    setError(null);
-    
+  const fetchContent = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
+      
       const response = await fetch(API_ENDPOINTS.explore);
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Content service is temporarily unavailable');
-        }
-        throw new Error('Failed to fetch content');
+        throw new Error('Content service is temporarily unavailable');
       }
-      const data = await response.json();
-      setContent(data);
+      
+      const data: ApiResponse<Content[]> = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to fetch content');
+      }
+      
+      setContent(data.data || []);
     } catch (err) {
       console.error('Error fetching content:', err);
-      setError(
-        retryCount < 3 
-          ? 'Failed to load content. Retrying...' 
-          : 'Failed to load content. Please try again later.'
-      );
+      setError(handleApiError(err));
       
-      // Retry logic with exponential backoff
-      if (retryCount < 3) {
-        setTimeout(() => {
-          fetchContent(retryCount + 1);
-        }, Math.pow(2, retryCount) * 1000); // 1s, 2s, 4s delays
-        return;
-      }
-
-      // Use placeholder data if all retries fail
+      // Use placeholder data for development/demo purposes
       setContent([
         {
           id: '1',
@@ -296,12 +286,17 @@ export default function ExplorePage() {
 
         {error && (
           <div className="mb-8 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center justify-between">
-            <span>{error}</span>
-            <button
-              onClick={() => fetchContent()}
-              className="ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <span>{error}</span>
+            </div>
+            <button 
+              onClick={fetchContent}
+              className="text-red-600 hover:text-red-800 text-sm font-medium"
             >
-              Retry
+              Try Again
             </button>
           </div>
         )}
