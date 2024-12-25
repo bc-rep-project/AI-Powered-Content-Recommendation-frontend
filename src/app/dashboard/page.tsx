@@ -2,43 +2,38 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
-interface User {
-  email: string;
-  picture?: string;
-  provider?: string;
-}
+import { User, RecommendationItem, RecommendationsResponse, apiFetch, API_ENDPOINTS } from '@/config/api.config';
 
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const handleAuth = async () => {
       try {
-        // Handle OAuth callback parameters
         const access_token = searchParams.get('access_token');
         const userEmail = searchParams.get('user');
         const provider = searchParams.get('provider');
         
         if (access_token) {
-          // Store the token and user info
           localStorage.setItem('auth_token', access_token);
           if (userEmail) {
             const userData = { 
               email: userEmail,
-              provider: provider || undefined
+              username: userEmail.split('@')[0],
+              picture: null,
+              oauth_provider: provider || null,
+              id: ''
             };
             localStorage.setItem('user', JSON.stringify(userData));
             setUser(userData);
           }
-          
-          // Clean up URL parameters
           router.replace('/dashboard');
         } else {
-          // Check if user is already authenticated
           const storedToken = localStorage.getItem('auth_token');
           const storedUser = localStorage.getItem('user');
           
@@ -64,6 +59,32 @@ export default function DashboardPage() {
 
     handleAuth();
   }, [searchParams, router]);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+          throw new Error('No auth token found');
+        }
+
+        const response = await apiFetch<RecommendationsResponse>(
+          API_ENDPOINTS.recommendations,
+          { method: 'GET' },
+          token
+        );
+
+        setRecommendations(response.data?.items || []);
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        setError('Failed to load recommendations');
+      }
+    };
+
+    if (user) {
+      fetchRecommendations();
+    }
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
@@ -101,20 +122,73 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Welcome to your Dashboard</h2>
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4">Your Profile</h3>
-            <div className="space-y-4">
-              <p><span className="font-medium">Email:</span> {user.email}</p>
-              {user.provider && (
-                <p><span className="font-medium">Sign in method:</span> {user.provider}</p>
-              )}
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Your Recommendations</h2>
+          
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+              {error}
             </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recommendations.map((item) => (
+              <div 
+                key={item.id}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                {item.image_url ? (
+                  <img 
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-48 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                    <span className="text-sm text-blue-600 font-medium">
+                      {item.metadata.readTime}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-4">{item.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {item.metadata.tags.map((tag) => (
+                      <span 
+                        key={tag}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-sm text-gray-500">
+                      Score: {(item.score * 100).toFixed(0)}%
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {recommendations.length === 0 && !error && !isLoading && (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No recommendations available yet.</p>
+            </div>
+          )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
