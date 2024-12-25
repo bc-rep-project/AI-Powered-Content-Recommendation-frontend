@@ -1,11 +1,18 @@
 export const API_BASE_URL = 'https://ai-recommendation-api.onrender.com/api/v1';
 
+// Frontend URLs for OAuth flow
+export const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
+
 export const API_ENDPOINTS = {
   // Auth endpoints
   register: `${API_BASE_URL}/auth/register`,
   login: `${API_BASE_URL}/auth/login`,
   googleAuth: `${API_BASE_URL}/auth/google`,
   googleCallback: `${API_BASE_URL}/auth/google/callback`,
+  
+  // Frontend OAuth endpoints
+  frontendGoogleAuth: `${FRONTEND_URL}/api/auth/google`,
+  frontendGoogleCallback: `${FRONTEND_URL}/api/auth/google/callback`,
   
   // Content endpoints
   recommendations: `${API_BASE_URL}/recommendations`,
