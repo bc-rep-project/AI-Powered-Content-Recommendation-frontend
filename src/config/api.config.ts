@@ -2,12 +2,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-recommendati
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://ai-powered-content-recommendation-frontend.vercel.app';
 
 export const API_ENDPOINTS = {
-  // Auth endpoints
-  register: `${API_BASE_URL}/api/v1/auth/register`,
-  login: `${API_BASE_URL}/api/v1/auth/login`,
-  googleAuth: `${API_BASE_URL}/api/v1/auth/google`,
-  googleCallback: `${API_BASE_URL}/api/v1/auth/google/callback`,
-  
   // Content endpoints
   recommendations: `${API_BASE_URL}/api/v1/recommendations`,
   explore: `${API_BASE_URL}/api/v1/content/explore`,
@@ -18,108 +12,59 @@ export const API_ENDPOINTS = {
   settings: `${API_BASE_URL}/api/v1/users/settings`,
   
   // Health check
-  health: `${API_BASE_URL}/health`
+  health: `${API_BASE_URL}/health`,
+  
+  // Root
+  root: `${API_BASE_URL}/`
 } as const;
-
-export const AUTH_ENDPOINTS = {
-  frontendGoogleAuth: '/auth/google',
-  frontendGoogleCallback: '/api/auth/google/callback'
-} as const;
-
-// API response types
-export interface User {
-  email: string;
-  username: string;
-  picture: string | null;
-  oauth_provider: string | null;
-  id: string;
-}
-
-export interface LoginResponse {
-  access_token: string;
-  token_type: string;
-  user: User;
-}
-
-export interface RegisterResponse {
-  message: string;
-  email: string;
-}
-
-export interface RecommendationItem {
-  id: string;
-  title: string;
-  description: string;
-  content_id: string;
-  score: number;
-  category: string;
-  image_url: string | null;
-  metadata: {
-    tags: string[];
-    readTime: string;
-  };
-  created_at: string;
-}
-
-export interface RecommendationsResponse {
-  items: RecommendationItem[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
 
 // Default headers for all requests
 export const API_HEADERS = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
-  'Origin': FRONTEND_URL,
+  'Origin': FRONTEND_URL
 };
 
 // Default fetch options
 export const DEFAULT_FETCH_OPTIONS: RequestInit = {
-  credentials: 'include',
+  credentials: 'include', // Include cookies for cross-origin requests
   headers: API_HEADERS,
-  mode: 'cors',
+  mode: 'cors' // Enable CORS
 };
-
-// Get auth headers with token
-export const getAuthHeader = (token: string) => ({
-  ...API_HEADERS,
-  'Authorization': `Bearer ${token}`
-});
 
 // FastAPI error response type
 interface FastAPIError {
   detail: string;
 }
 
-// Fetch wrapper with default options and optional auth
+// Fetch wrapper with default options
 export const apiFetch = async <T>(
   url: string, 
-  options: RequestInit = {},
-  token?: string
+  options: RequestInit = {}
 ): Promise<ApiResponse<T>> => {
   try {
-    const headers = token 
-      ? { ...DEFAULT_FETCH_OPTIONS.headers, ...getAuthHeader(token) }
-      : DEFAULT_FETCH_OPTIONS.headers;
-
     const response = await fetch(url, {
       ...DEFAULT_FETCH_OPTIONS,
       ...options,
       headers: {
-        ...headers,
-        ...options.headers,
-      },
+        ...DEFAULT_FETCH_OPTIONS.headers,
+        ...options.headers
+      }
     });
 
-    const data = await response.json().catch(() => null);
+    let data;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json().catch(() => null);
+    } else {
+      data = await response.text().catch(() => null);
+    }
 
     if (!response.ok) {
       const error = {
         status: response.status,
         statusText: response.statusText,
-        data: data as FastAPIError || { detail: 'Unknown error occurred' },
+        data: typeof data === 'object' ? data as FastAPIError : { detail: data || 'Unknown error occurred' }
       };
       console.error('API Error:', error);
       throw error;
@@ -127,7 +72,7 @@ export const apiFetch = async <T>(
 
     return {
       success: true,
-      data: data as T,
+      data: data as T
     };
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
@@ -146,23 +91,22 @@ export const apiFetch = async <T>(
 // Error handling utilities
 export const handleApiError = (error: any): string => {
   if (error.status) {
+    // Server responded with error
     switch (error.status) {
       case 0:
         return 'Unable to connect to the server. Please check your internet connection.';
       case 404:
         return error.data?.detail || 'The requested resource was not found';
-      case 401:
-        return error.data?.detail || 'Please login to access this feature';
-      case 403:
-        return error.data?.detail || 'You do not have permission to access this resource';
       case 500:
         return error.data?.detail || 'Server error. Please try again later';
       default:
         return error.data?.detail || 'An unexpected error occurred';
     }
   } else if (error.request) {
+    // Request made but no response
     return 'Unable to connect to the server. Please check your internet connection';
   } else {
+    // Error setting up request
     return 'An error occurred while processing your request';
   }
 };
