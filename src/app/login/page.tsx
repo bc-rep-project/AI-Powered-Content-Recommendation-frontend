@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   const getErrorMessage = () => {
     if (detail) {
-      return `Backend Error: ${detail}`;
+      return 'Authentication server error. Please try again later.';
     }
     
     switch (error) {
@@ -40,9 +40,11 @@ export default function LoginPage() {
             <div className="text-red-600 mb-4">
               {getErrorMessage()}
             </div>
-            <div className="mt-2 text-sm text-gray-500 mb-4">
-              {detail && 'Please contact support if this error persists.'}
-            </div>
+            {detail && (
+              <div className="text-sm text-gray-500 mb-4">
+                Our team has been notified. Please try again in a few minutes.
+              </div>
+            )}
             <button
               onClick={() => window.location.href = API_ENDPOINTS.googleAuth}
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
