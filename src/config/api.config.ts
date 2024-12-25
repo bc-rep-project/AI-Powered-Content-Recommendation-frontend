@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   // Auth endpoints
   register: `${API_BASE_URL}/auth/register`,
   login: `${API_BASE_URL}/auth/login`,
+  // Use the exact redirect URI configured in Google Console
   googleAuth: `${API_BASE_URL}/auth/google`,
   googleCallback: `${API_BASE_URL}/auth/google/callback`,
   
@@ -20,7 +21,6 @@ export const API_ENDPOINTS = {
 export const API_HEADERS = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
-  'X-Frontend-URL': FRONTEND_URL, // Add frontend URL to headers
 };
 
 export const getAuthHeader = (token: string) => ({

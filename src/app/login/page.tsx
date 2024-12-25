@@ -11,11 +11,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!error && !detail) {
-      // Create the auth URL with the frontend callback
-      const authUrl = new URL(API_ENDPOINTS.googleAuth);
-      // Tell backend where to redirect after OAuth
-      authUrl.searchParams.set('callback_url', `${window.location.origin}/api/auth/callback`);
-      window.location.href = authUrl.toString();
+      // Redirect to backend's Google auth endpoint
+      window.location.href = API_ENDPOINTS.googleAuth;
     }
   }, [error, detail]);
 
@@ -49,9 +46,7 @@ export default function LoginPage() {
             </div>
             <button
               onClick={() => {
-                const authUrl = new URL(API_ENDPOINTS.googleAuth);
-                authUrl.searchParams.set('callback_url', `${window.location.origin}/api/auth/callback`);
-                window.location.href = authUrl.toString();
+                window.location.href = API_ENDPOINTS.googleAuth;
               }}
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
