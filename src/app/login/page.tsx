@@ -10,7 +10,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!error) {
-      window.location.href = API_ENDPOINTS.frontendGoogleAuth;
+      window.location.href = API_ENDPOINTS.googleAuth;
     }
   }, [error]);
 
@@ -26,10 +26,10 @@ export default function LoginPage() {
               {!['auth_failed', 'no_code', 'access_denied'].includes(error) && 'An error occurred. Please try again.'}
             </div>
             <button
-              onClick={() => window.location.href = API_ENDPOINTS.frontendGoogleAuth}
+              onClick={() => window.location.href = API_ENDPOINTS.googleAuth}
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Try Again
+              Try Again with Google
             </button>
           </div>
         ) : (

@@ -11,8 +11,8 @@ export const API_ENDPOINTS = {
   googleCallback: `${API_BASE_URL}/auth/google/callback`,
   
   // Frontend OAuth endpoints
-  frontendGoogleAuth: `${FRONTEND_URL}/api/auth/google`,
-  frontendGoogleCallback: `${FRONTEND_URL}/api/auth/google/callback`,
+  frontendGoogleAuth: '/auth/google',
+  frontendGoogleCallback: `${API_BASE_URL}/auth/google/callback`,
   
   // Content endpoints
   recommendations: `${API_BASE_URL}/recommendations`,
