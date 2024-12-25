@@ -20,6 +20,7 @@ export const API_ENDPOINTS = {
 export const API_HEADERS = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
+  'X-Frontend-URL': FRONTEND_URL, // Add frontend URL to headers
 };
 
 export const getAuthHeader = (token: string) => ({

@@ -11,12 +11,18 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!error && !detail) {
-      window.location.href = API_ENDPOINTS.googleAuth;
+      // Add frontend URL as a query parameter
+      const authUrl = new URL(API_ENDPOINTS.googleAuth);
+      authUrl.searchParams.set('redirect_uri', `${window.location.origin}/dashboard`);
+      window.location.href = authUrl.toString();
     }
   }, [error, detail]);
 
   const getErrorMessage = () => {
     if (detail) {
+      if (detail.includes('OAuth callback failed')) {
+        return 'Authentication server is temporarily unavailable. Our team has been notified.';
+      }
       return 'Authentication server error. Please try again later.';
     }
     
@@ -42,11 +48,15 @@ export default function LoginPage() {
             </div>
             {detail && (
               <div className="text-sm text-gray-500 mb-4">
-                Our team has been notified. Please try again in a few minutes.
+                Please try again in a few minutes. If the problem persists, contact support.
               </div>
             )}
             <button
-              onClick={() => window.location.href = API_ENDPOINTS.googleAuth}
+              onClick={() => {
+                const authUrl = new URL(API_ENDPOINTS.googleAuth);
+                authUrl.searchParams.set('redirect_uri', `${window.location.origin}/dashboard`);
+                window.location.href = authUrl.toString();
+              }}
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Try Again with Google
