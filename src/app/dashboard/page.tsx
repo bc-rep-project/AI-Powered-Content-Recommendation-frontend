@@ -47,6 +47,7 @@ export default function DashboardPage() {
           } catch (error) {
             console.error('Error parsing stored user:', error);
             router.replace('/login');
+            return;
           }
         }
         

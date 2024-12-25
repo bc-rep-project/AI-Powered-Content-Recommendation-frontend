@@ -1,30 +1,29 @@
-export default function Home() {
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('auth_token');
+    const user = localStorage.getItem('user');
+
+    if (token && user) {
+      // If authenticated, go to dashboard
+      router.replace('/dashboard');
+    } else {
+      // If not authenticated, go to login
+      router.replace('/login');
+    }
+  }, [router]);
+
+  // Show loading state while redirecting
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">
-            AI-Powered Content Recommendations
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Discover content tailored just for you through our advanced AI recommendation engine.
-          </p>
-          <div className="space-x-4">
-            <a
-              href="/dashboard"
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              View Recommendations
-            </a>
-            <a
-              href="/about"
-              className="inline-block bg-gray-100 text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-            >
-              Learn More
-            </a>
-          </div>
-        </div>
-      </main>
+    <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
     </div>
   );
 } 
