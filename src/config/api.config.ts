@@ -7,12 +7,8 @@ export const API_ENDPOINTS = {
   // Auth endpoints
   register: `${API_BASE_URL}/auth/register`,
   login: `${API_BASE_URL}/auth/login`,
-  googleAuth: `${API_BASE_URL}/auth/google`,
+  googleAuth: `${API_BASE_URL}/auth/google?redirect_uri=${encodeURIComponent(`${FRONTEND_URL}/login`)}`,
   googleCallback: `${API_BASE_URL}/auth/google/callback`,
-  
-  // Frontend OAuth endpoints
-  frontendGoogleAuth: '/auth/google',
-  frontendGoogleCallback: `${API_BASE_URL}/auth/google/callback`,
   
   // Content endpoints
   recommendations: `${API_BASE_URL}/recommendations`,

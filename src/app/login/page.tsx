@@ -7,23 +7,41 @@ import { API_ENDPOINTS } from '@/config/api.config';
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
+  const detail = searchParams.get('detail');
 
   useEffect(() => {
-    if (!error) {
+    if (!error && !detail) {
       window.location.href = API_ENDPOINTS.googleAuth;
     }
-  }, [error]);
+  }, [error, detail]);
+
+  const getErrorMessage = () => {
+    if (detail) {
+      return `Backend Error: ${detail}`;
+    }
+    
+    switch (error) {
+      case 'auth_failed':
+        return 'Authentication failed. Please try again.';
+      case 'no_code':
+        return 'Invalid authentication response. Please try again.';
+      case 'access_denied':
+        return 'Access was denied. Please try again.';
+      default:
+        return 'An error occurred. Please try again.';
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
-        {error ? (
+        {(error || detail) ? (
           <div className="text-center">
             <div className="text-red-600 mb-4">
-              {error === 'auth_failed' && 'Authentication failed. Please try again.'}
-              {error === 'no_code' && 'Invalid authentication response. Please try again.'}
-              {error === 'access_denied' && 'Access was denied. Please try again.'}
-              {!['auth_failed', 'no_code', 'access_denied'].includes(error) && 'An error occurred. Please try again.'}
+              {getErrorMessage()}
+            </div>
+            <div className="mt-2 text-sm text-gray-500 mb-4">
+              {detail && 'Please contact support if this error persists.'}
             </div>
             <button
               onClick={() => window.location.href = API_ENDPOINTS.googleAuth}
