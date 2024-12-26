@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#ffffff"/>
+  <g transform="translate(64, 64) scale(0.75)">
+    <!-- Left brain hemisphere -->
+    <path d="M200,256 C140,220 120,160 160,120 C200,80 240,100 260,140" 
+          fill="none" stroke="#00ff9d" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="160" cy="120" r="12" fill="#00ff9d"/>
+    <circle cx="200" cy="100" r="12" fill="#00ff9d"/>
+    <circle cx="240" cy="120" r="12" fill="#00ff9d"/>
+    <circle cx="260" cy="140" r="12" fill="#00ff9d"/>
+    
+    <!-- Right brain hemisphere -->
+    <path d="M312,256 C372,220 392,160 352,120 C312,80 272,100 252,140" 
+          fill="none" stroke="#ff69b4" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="352" cy="120" r="12" fill="#ff69b4"/>
+    <circle cx="312" cy="100" r="12" fill="#ff69b4"/>
+    <circle cx="272" cy="120" r="12" fill="#ff69b4"/>
+    <circle cx="252" cy="140" r="12" fill="#ff69b4"/>
+    
+    <!-- Connecting nodes -->
+    <line x1="200" y1="256" x2="312" y2="256" 
+          stroke="#333" stroke-width="24" stroke-linecap="round"/>
+    
+    <!-- Additional network nodes -->
+    <circle cx="160" cy="200" r="8" fill="#00bfff"/>
+    <circle cx="352" cy="200" r="8" fill="#ff1493"/>
+    <circle cx="256" cy="180" r="8" fill="#9932cc"/>
+  </g>
+</svg> 

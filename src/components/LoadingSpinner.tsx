@@ -1,31 +1,23 @@
 interface LoadingSpinnerProps {
-    size?: 'sm' | 'md' | 'lg';
-    fullScreen?: boolean;
+    size?: 'small' | 'medium' | 'large';
+    color?: string;
 }
 
-const sizes = {
-    sm: 'h-6 w-6',
-    md: 'h-8 w-8',
-    lg: 'h-12 w-12'
-} as const;
+export default function LoadingSpinner({ 
+    size = 'medium', 
+    color = 'blue-600' 
+}: LoadingSpinnerProps) {
+    const sizeClasses = {
+        small: 'h-4 w-4',
+        medium: 'h-8 w-8',
+        large: 'h-12 w-12'
+    };
 
-export function LoadingSpinner({ size = 'md', fullScreen = true }: LoadingSpinnerProps) {
-    const spinner = (
-        <div 
-            role="status"
-            className={`animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 ${sizes[size]}`}
-        >
-            <span className="sr-only">Loading...</span>
+    return (
+        <div className="flex justify-center items-center">
+            <div className={`animate-spin ${sizeClasses[size]} border-4 border-${color} rounded-full border-t-transparent`}>
+                <span className="sr-only">Loading...</span>
+            </div>
         </div>
     );
-
-    if (fullScreen) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                {spinner}
-            </div>
-        );
-    }
-
-    return spinner;
 } 
