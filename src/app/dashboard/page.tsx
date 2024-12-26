@@ -38,6 +38,9 @@ export default function DashboardPage() {
     tags: [],
   });
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [editingContent, setEditingContent] = useState<Content | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Extract unique tags from content
   useEffect(() => {
@@ -123,6 +126,36 @@ export default function DashboardPage() {
 
   // Determine which content to show
   const displayContent = filterContent(searchQuery ? searchResults : recommendations);
+
+  const handleEdit = (content: Content) => {
+    setEditingContent(content);
+    setIsEditing(true);
+  };
+
+  const handleSave = async (updatedContent: Content) => {
+    setIsSaving(true);
+    try {
+      await apiFetch(`${API_ENDPOINTS.content}/${updatedContent.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updatedContent),
+      });
+      
+      setRecommendations(prev => 
+        prev.map(item => item.id === updatedContent.id ? updatedContent : item)
+      );
+      setIsEditing(false);
+      setEditingContent(null);
+    } catch (err) {
+      setError(handleApiError(err));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditingContent(null);
+  };
 
   if (isLoading) {
     return (
@@ -343,19 +376,140 @@ export default function DashboardPage() {
           )}
         </div>
 
+        {/* Edit Modal */}
+        {isEditing && editingContent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+              <h2 className="text-2xl font-bold mb-4">Edit Content</h2>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handleSave(editingContent);
+              }}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input
+                      type="text"
+                      value={editingContent.title}
+                      onChange={(e) => setEditingContent({
+                        ...editingContent,
+                        title: e.target.value
+                      })}
+                      className="w-full p-2 border rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={editingContent.description}
+                      onChange={(e) => setEditingContent({
+                        ...editingContent,
+                        description: e.target.value
+                      })}
+                      className="w-full p-2 border rounded-lg"
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select
+                      value={editingContent.category}
+                      onChange={(e) => setEditingContent({
+                        ...editingContent,
+                        category: e.target.value
+                      })}
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      {CATEGORIES.filter(cat => cat !== 'All').map((category) => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                    <div className="flex flex-wrap gap-2">
+                      {availableTags.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => {
+                            const newTags = editingContent.tags.includes(tag)
+                              ? editingContent.tags.filter(t => t !== tag)
+                              : [...editingContent.tags, tag];
+                            setEditingContent({
+                              ...editingContent,
+                              tags: newTags
+                            });
+                          }}
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            editingContent.tags.includes(tag)
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    disabled={isSaving}
+                  >
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* Content Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayContent.map((item) => (
             <div key={item.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
               {item.imageUrl && (
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
+                <div className="relative group">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transform transition hover:scale-105"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
               )}
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h3>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
+                  {!item.imageUrl && (
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="p-2 text-gray-500 hover:text-blue-600"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
                 <p className="text-gray-600 mb-4">{item.description}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {item.tags.map((tag) => (
