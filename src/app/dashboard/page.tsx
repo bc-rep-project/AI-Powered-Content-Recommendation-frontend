@@ -135,7 +135,7 @@ export default function DashboardPage() {
   const handleSave = async (updatedContent: Content) => {
     setIsSaving(true);
     try {
-      await apiFetch(`${API_ENDPOINTS.content}/${updatedContent.id}`, {
+      await apiFetch(API_ENDPOINTS.updateContent(updatedContent.id), {
         method: 'PUT',
         body: JSON.stringify(updatedContent),
       });

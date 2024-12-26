@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
   settings: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/settings`,
   health: `${process.env.NEXT_PUBLIC_API_URL}/health`,
   updateContent: (id: string) => `${process.env.NEXT_PUBLIC_API_URL}/api/v1/content/${id}`,
+  trainModel: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/train`,
 };
 
 export const DEFAULT_HEADERS = {
@@ -25,13 +26,24 @@ export async function apiFetch<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
+    // For development, return dummy data for certain endpoints
+    if (process.env.NODE_ENV === 'development') {
+      if (url.includes('/recommendations')) {
+        return {
+          data: require('../utils/dummyData').dummyContent as T,
+          status: 200,
+          statusText: 'OK'
+        };
+      }
+    }
+
     const response = await fetch(url, {
       ...options,
       headers: {
         ...DEFAULT_HEADERS,
         ...options.headers,
       },
-      credentials: 'include', // This enables sending cookies
+      credentials: 'include',
     });
 
     let data;
@@ -41,17 +53,36 @@ export async function apiFetch<T>(
       data = null;
     }
 
+    // Handle specific error cases
     if (!response.ok) {
-      // Use dummy data for 401 errors in development
-      if (response.status === 401 && process.env.NODE_ENV === 'development') {
-        return { data: null as any, status: 200, statusText: 'OK' };
+      switch (response.status) {
+        case 401:
+          // Return dummy data in development
+          if (process.env.NODE_ENV === 'development') {
+            return {
+              data: require('../utils/dummyData').dummyContent as T,
+              status: 200,
+              statusText: 'OK'
+            };
+          }
+          throw {
+            data: { detail: 'Please log in to access this resource' },
+            status: 401,
+            statusText: 'Unauthorized'
+          };
+        case 405:
+          throw {
+            data: { detail: 'This operation is not supported' },
+            status: 405,
+            statusText: 'Method Not Allowed'
+          };
+        default:
+          throw {
+            data,
+            status: response.status,
+            statusText: response.statusText,
+          };
       }
-      
-      throw {
-        data,
-        status: response.status,
-        statusText: response.statusText,
-      };
     }
 
     return {
@@ -61,6 +92,14 @@ export async function apiFetch<T>(
     };
   } catch (error: any) {
     console.error('API Error:', error);
+    // Return dummy data in development for any error
+    if (process.env.NODE_ENV === 'development') {
+      return {
+        data: require('../utils/dummyData').dummyContent as T,
+        status: 200,
+        statusText: 'OK'
+      };
+    }
     throw {
       data: error.data || { detail: 'Unknown error occurred' },
       status: error.status || 500,
@@ -77,4 +116,34 @@ export function handleApiError(error: any): string {
     return error.message;
   }
   return 'An unexpected error occurred. Please try again later.';
+}
+
+export async function trainModelWithDummyData() {
+  const dummyData = require('../utils/dummyData').dummyContent;
+  
+  try {
+    const response = await apiFetch(API_ENDPOINTS.trainModel, {
+      method: 'POST',
+      body: JSON.stringify({
+        training_data: dummyData.map(item => ({
+          content_id: item.id,
+          title: item.title,
+          description: item.description,
+          category: item.category,
+          tags: item.tags,
+          rating: item.rating || 0,
+          interactions: {
+            views: Math.floor(Math.random() * 1000),
+            likes: Math.floor(Math.random() * 100),
+            shares: Math.floor(Math.random() * 50)
+          }
+        }))
+      })
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Failed to train model:', error);
+    throw error;
+  }
 } 
