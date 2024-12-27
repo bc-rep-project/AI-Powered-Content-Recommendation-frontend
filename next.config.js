@@ -19,6 +19,22 @@ const nextConfig = {
           { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization' },
         ],
       },
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: `
+              default-src 'self';
+              script-src 'self' 'unsafe-inline' 'unsafe-eval';
+              style-src 'self' 'unsafe-inline';
+              img-src 'self' https: data:;
+              font-src 'self';
+              connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL};
+            `.replace(/\s+/g, ' ').trim()
+          }
+        ]
+      }
     ]
   },
 }

@@ -7,6 +7,10 @@ export const API_ENDPOINTS = {
   health: `${process.env.NEXT_PUBLIC_API_URL}/health`,
   updateContent: (id: string) => `${process.env.NEXT_PUBLIC_API_URL}/api/v1/content/${id}`,
   trainModel: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/train`,
+  // Auth endpoints
+  register: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`,
+  login: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
+  me: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`,
 };
 
 export const DEFAULT_HEADERS = {

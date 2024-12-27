@@ -51,7 +51,7 @@ export default function DashboardPage() {
     });
     setAvailableTags(Array.from(tags));
   }, [recommendations, searchResults]);
-
+  
   useEffect(() => {
     fetchRecommendations();
   }, []);
@@ -264,7 +264,7 @@ export default function DashboardPage() {
 
             {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center">
-              <button 
+            <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="text-gray-500 hover:text-blue-600 focus:outline-none focus:text-blue-600"
               >
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                     d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
                   />
                 </svg>
-              </button>
+            </button>
             </div>
           </div>
 
@@ -440,7 +440,7 @@ export default function DashboardPage() {
                 e.preventDefault();
                 handleSave(editingContent);
               }}>
-                <div className="space-y-4">
+            <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                     <input
