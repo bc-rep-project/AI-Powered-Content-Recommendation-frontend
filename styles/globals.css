@@ -4,27 +4,46 @@
 
 @layer base {
   body {
-    @apply bg-white text-gray-900 transition-colors duration-200
-           dark:bg-dark-bg dark:text-dark-text;
+    @apply bg-white text-gray-900 transition-colors duration-200 ease-in-out;
   }
 
-  /* Add dark mode styles for common elements */
-  .card {
-    @apply bg-white dark:bg-dark-surface
-           border border-gray-200 dark:border-gray-700
-           shadow-sm rounded-lg;
+  .dark body {
+    @apply bg-dark-bg text-dark-text-primary;
   }
 
-  .input {
-    @apply bg-white dark:bg-dark-surface
-           border border-gray-300 dark:border-gray-600
-           text-gray-900 dark:text-gray-100
-           focus:ring-primary-500 dark:focus:ring-primary-400;
-  }
+  /* Default dark mode styles for common elements */
+  .dark {
+    /* Cards */
+    .card {
+      @apply bg-dark-paper border-dark-border;
+    }
 
-  .button-primary {
-    @apply bg-primary-500 dark:bg-primary-400
-           text-white dark:text-gray-900
-           hover:bg-primary-600 dark:hover:bg-primary-300;
+    /* Inputs */
+    input, textarea, select {
+      @apply bg-dark-paper border-dark-border text-dark-text-primary;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      @apply bg-primary-600 hover:bg-primary-700;
+    }
+
+    .btn-secondary {
+      @apply bg-gray-700 hover:bg-gray-600;
+    }
+
+    /* Links */
+    a {
+      @apply text-primary-400 hover:text-primary-300;
+    }
+
+    /* Tables */
+    table {
+      @apply border-dark-border;
+    }
+
+    th, td {
+      @apply border-dark-border;
+    }
   }
 } 

@@ -1,3 +1,5 @@
+import React from 'react';
+
 export function RecommendationCard({ recommendation }) {
   return (
     <div className="card p-4">

@@ -10,18 +10,19 @@ module.exports = {
       colors: {
         // Light mode colors
         primary: {
+          light: '#60A5FA',
           DEFAULT: '#3B82F6',
           dark: '#2563EB',
         },
         // Dark mode specific colors
         dark: {
           bg: '#121212',
-          surface: '#1E1E1E',
+          paper: '#1E1E1E',
           primary: '#90CAF9',
-          text: '#E5E7EB',
-        },
-      },
-    },
+          secondary: '#BB86FC',
+        }
+      }
+    }
   },
   plugins: [],
 } 
