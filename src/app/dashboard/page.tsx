@@ -21,6 +21,20 @@ interface Filters {
   tags: string[];
 }
 
+interface ContentItem {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  rating?: number;
+  interactions?: {
+    views: number;
+    likes: number;
+    shares: number;
+  };
+}
+
 const CATEGORIES = ['All', 'Technology', 'Science', 'Business', 'Arts', 'Health'];
 
 export default function DashboardPage() {
@@ -161,12 +175,12 @@ export default function DashboardPage() {
   const trainModel = async () => {
     setIsTraining(true);
     try {
-      const dummyData = require('@/utils/dummyData').dummyContent;
+      const dummyData: ContentItem[] = require('@/utils/dummyData').dummyContent;
       
       await apiFetch(API_ENDPOINTS.trainModel, {
         method: 'POST',
         body: JSON.stringify({
-          training_data: dummyData.map(item => ({
+          training_data: dummyData.map((item: ContentItem) => ({
             content_id: item.id,
             title: item.title,
             description: item.description,
