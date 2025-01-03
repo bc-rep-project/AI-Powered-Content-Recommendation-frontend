@@ -1,3 +1,9 @@
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  status: number;
+}
+
 export const API_ENDPOINTS = {
   recommendations: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/recommendations`,
   explore: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/content/explore`,
@@ -18,13 +24,6 @@ export const DEFAULT_HEADERS = {
   'Accept': 'application/json',
 };
 
-interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  status: number;
-  statusText: string;
-}
-
 export async function apiFetch<T>(
   url: string,
   options: RequestInit = {}
@@ -36,7 +35,7 @@ export async function apiFetch<T>(
         return {
           data: require('../utils/dummyData').dummyContent as T,
           status: 200,
-          statusText: 'OK'
+          message: 'OK'
         };
       }
     }
@@ -66,25 +65,25 @@ export async function apiFetch<T>(
             return {
               data: require('../utils/dummyData').dummyContent as T,
               status: 200,
-              statusText: 'OK'
+              message: 'OK'
             };
           }
           throw {
             data: { detail: 'Please log in to access this resource' },
             status: 401,
-            statusText: 'Unauthorized'
+            message: 'Unauthorized'
           };
         case 405:
           throw {
             data: { detail: 'This operation is not supported' },
             status: 405,
-            statusText: 'Method Not Allowed'
+            message: 'Method Not Allowed'
           };
         default:
           throw {
             data,
             status: response.status,
-            statusText: response.statusText,
+            message: response.statusText,
           };
       }
     }
@@ -92,7 +91,7 @@ export async function apiFetch<T>(
     return {
       data,
       status: response.status,
-      statusText: response.statusText,
+      message: response.statusText,
     };
   } catch (error: any) {
     console.error('API Error:', error);
@@ -101,13 +100,13 @@ export async function apiFetch<T>(
       return {
         data: require('../utils/dummyData').dummyContent as T,
         status: 200,
-        statusText: 'OK'
+        message: 'OK'
       };
     }
     throw {
       data: error.data || { detail: 'Unknown error occurred' },
       status: error.status || 500,
-      statusText: error.statusText || '',
+      message: error.statusText || '',
     };
   }
 }
@@ -123,13 +122,22 @@ export function handleApiError(error: any): string {
 }
 
 export async function trainModelWithDummyData() {
-  const dummyData = require('../utils/dummyData').dummyContent;
+  interface DummyDataItem {
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    tags: string[];
+    rating?: number;
+  }
+
+  const dummyData = require('../utils/dummyData').dummyContent as DummyDataItem[];
   
   try {
     const response = await apiFetch(API_ENDPOINTS.trainModel, {
       method: 'POST',
       body: JSON.stringify({
-        training_data: dummyData.map(item => ({
+        training_data: dummyData.map((item: DummyDataItem) => ({
           content_id: item.id,
           title: item.title,
           description: item.description,
