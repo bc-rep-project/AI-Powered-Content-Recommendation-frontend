@@ -4,46 +4,6 @@
 
 @layer base {
   body {
-    @apply bg-white text-gray-900 transition-colors duration-200 ease-in-out;
-  }
-
-  .dark body {
-    @apply bg-dark-bg text-dark-text-primary;
-  }
-
-  /* Default dark mode styles for common elements */
-  .dark {
-    /* Cards */
-    .card {
-      @apply bg-dark-paper border-dark-border;
-    }
-
-    /* Inputs */
-    input, textarea, select {
-      @apply bg-dark-paper border-dark-border text-dark-text-primary;
-    }
-
-    /* Buttons */
-    .btn-primary {
-      @apply bg-primary-600 hover:bg-primary-700;
-    }
-
-    .btn-secondary {
-      @apply bg-gray-700 hover:bg-gray-600;
-    }
-
-    /* Links */
-    a {
-      @apply text-primary-400 hover:text-primary-300;
-    }
-
-    /* Tables */
-    table {
-      @apply border-dark-border;
-    }
-
-    th, td {
-      @apply border-dark-border;
-    }
+    @apply bg-white dark:bg-dark-bg text-gray-900 dark:text-gray-100;
   }
 } 
