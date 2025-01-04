@@ -1,8 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS } from 'chart.js/auto';
-import { recommendationService } from '../services/api';
-import type { InteractionData } from '../types';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+import { recommendationService, type InteractionData } from '../services/api';
 
 const InteractionChart = () => {
   const [data, setData] = useState<InteractionData[]>([]);
@@ -34,11 +53,11 @@ const InteractionChart = () => {
   }
 
   const chartData = {
-    labels: data.map(d => new Date(d.timestamp).toLocaleDateString()),
+    labels: data.map(d => new Date(d.date).toLocaleDateString()),
     datasets: [
       {
         label: 'User Interactions',
-        data: data.map(d => d.interactionCount),
+        data: data.map(d => d.interactions),
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1

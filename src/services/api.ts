@@ -93,3 +93,19 @@ class ApiService {
 }
 
 export const apiService = new ApiService(); 
+
+export interface InteractionData {
+  date: string;
+  interactions: number;
+}
+
+export const recommendationService = {
+  async fetchInteractionHistory(): Promise<InteractionData[]> {
+    return [
+      { date: '2024-01-01', interactions: 10 },
+      { date: '2024-01-02', interactions: 15 },
+      { date: '2024-01-03', interactions: 8 },
+      { date: '2024-01-04', interactions: 20 },
+    ];
+  }
+}; 
