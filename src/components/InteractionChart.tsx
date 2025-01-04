@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import { recommendationService, type InteractionData } from '../services/api';
 
 ChartJS.register(
   CategoryScale,
@@ -20,8 +21,6 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-
-import { recommendationService, type InteractionData } from '../services/api';
 
 const InteractionChart = () => {
   const [data, setData] = useState<InteractionData[]>([]);
