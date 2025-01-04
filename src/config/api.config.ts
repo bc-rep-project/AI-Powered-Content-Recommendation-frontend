@@ -24,6 +24,10 @@ export const DEFAULT_HEADERS = {
   'Accept': 'application/json',
 };
 
+export const getAuthHeader = (token: string) => ({
+  'Authorization': `Bearer ${token}`
+});
+
 export async function apiFetch<T>(
   url: string,
   options: RequestInit = {}
