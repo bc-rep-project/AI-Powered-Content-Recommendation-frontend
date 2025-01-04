@@ -1,15 +1,25 @@
-import { Skeleton, Stack, Box } from '@chakra-ui/react';
+import React from 'react';
+
+interface StackProps {
+  children: JSX.Element | JSX.Element[];
+  spacing?: number;
+}
+
+const Stack = ({ children, spacing }: StackProps) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: `${spacing}px` }}>
+    {children}
+  </div>
+);
 
 export const RecommendationSkeleton = () => (
-    <Stack spacing={4}>
-        {[...Array(3)].map((_, i) => (
-            <Box key={i} p={4} borderWidth="1px" borderRadius="lg">
-                <Stack>
-                    <Skeleton height="20px" width="200px" />
-                    <Skeleton height="15px" width="300px" />
-                    <Skeleton height="15px" width="250px" />
-                </Stack>
-            </Box>
-        ))}
-    </Stack>
+  <Stack spacing={4}>
+    {[...Array(3)].map((_, i) => (
+      <div key={i} className="p-4 border rounded-lg">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    ))}
+  </Stack>
 ); 
