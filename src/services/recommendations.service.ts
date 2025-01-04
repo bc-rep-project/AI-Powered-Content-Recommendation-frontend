@@ -1,4 +1,4 @@
-import { API_ENDPOINTS, API_HEADERS, getAuthHeader } from '../config/api.config';
+import { API_ENDPOINTS, DEFAULT_HEADERS, getAuthHeader } from '../config/api.config';
 
 export interface Recommendation {
   id: string;
@@ -14,7 +14,7 @@ export const recommendationsService = {
     const response = await fetch(API_ENDPOINTS.recommendations, {
       method: 'GET',
       headers: {
-        ...API_HEADERS,
+        ...DEFAULT_HEADERS,
         ...getAuthHeader(token),
       },
     });
