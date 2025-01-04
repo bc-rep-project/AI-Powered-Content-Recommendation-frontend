@@ -1,108 +1,45 @@
-import {
-  Box,
-  VStack,
-  Icon,
-  Text,
-  Link,
-  Flex,
-  useColorModeValue,
-} from '@chakra-ui/react';
-import {
-  FiHome,
-  FiTrendingUp,
-  FiCompass,
-  FiStar,
-  FiSettings,
-} from 'react-icons/fi';
-import NextLink from 'next/link';
+import React from 'react';
 import { useRouter } from 'next/router';
+import { IconType } from 'react-icons';
+import { FiHome, FiCompass, FiStar, FiSettings } from 'react-icons/fi';
 
-interface NavItemProps {
-  icon: any;
-  children: string;
+interface NavItem {
+  label: string;
+  icon: IconType;
   href: string;
 }
 
-const NavItem = ({ icon, children, href }: NavItemProps) => {
+const NAV_ITEMS: NavItem[] = [
+  { label: 'Home', icon: FiHome, href: '/dashboard' },
+  { label: 'Explore', icon: FiCompass, href: '/explore' },
+  { label: 'Favorites', icon: FiStar, href: '/favorites' },
+  { label: 'Settings', icon: FiSettings, href: '/settings' },
+];
+
+export const Sidebar = () => {
   const router = useRouter();
-  const isActive = router.pathname === href;
-  const activeBg = useColorModeValue('brand.50', 'gray.700');
-  const activeColor = useColorModeValue('brand.600', 'brand.200');
-  const inactiveColor = useColorModeValue('gray.600', 'gray.300');
 
   return (
-    <Link
-      as={NextLink}
-      href={href}
-      style={{ textDecoration: 'none' }}
-      _focus={{ boxShadow: 'none' }}
-    >
-      <Flex
-        align="center"
-        p="4"
-        mx="4"
-        borderRadius="lg"
-        role="group"
-        cursor="pointer"
-        bg={isActive ? activeBg : 'transparent'}
-        color={isActive ? activeColor : inactiveColor}
-        _hover={{
-          bg: activeBg,
-          color: activeColor,
-        }}
-      >
-        <Icon
-          mr="4"
-          fontSize="16"
-          as={icon}
-        />
-        {children}
-      </Flex>
-    </Link>
+    <div className="w-64 bg-white dark:bg-gray-800 h-full shadow-lg">
+      <nav className="mt-5 px-2">
+        {NAV_ITEMS.map((item) => {
+          const isActive = router.pathname === item.href;
+          const Icon = item.icon;
+          
+          return (
+            <a
+              key={item.label}
+              href={item.href}
+              className={`flex items-center px-4 py-2 mt-2 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                isActive ? 'bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-white' : ''
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="mx-4 font-medium">{item.label}</span>
+            </a>
+          );
+        })}
+      </nav>
+    </div>
   );
-};
-
-export default function Sidebar() {
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-
-  return (
-    <Box
-      bg={bgColor}
-      borderRight="1px"
-      borderColor={borderColor}
-      w={{ base: 'full', md: 60 }}
-      pos="fixed"
-      h="full"
-    >
-      <VStack h="full" spacing={0} align="stretch">
-        <Box p={5}>
-          <Text fontSize="2xl" fontWeight="bold" color="brand.500">
-            AI Rec
-          </Text>
-        </Box>
-
-        <VStack spacing={1} align="stretch" flex={1}>
-          <NavItem icon={FiHome} href="/dashboard">
-            Dashboard
-          </NavItem>
-          <NavItem icon={FiCompass} href="/discover">
-            Discover
-          </NavItem>
-          <NavItem icon={FiTrendingUp} href="/trending">
-            Trending
-          </NavItem>
-          <NavItem icon={FiStar} href="/favorites">
-            Favorites
-          </NavItem>
-        </VStack>
-
-        <Box p={4}>
-          <NavItem icon={FiSettings} href="/settings">
-            Settings
-          </NavItem>
-        </Box>
-      </VStack>
-    </Box>
-  );
-} 
+}; 
