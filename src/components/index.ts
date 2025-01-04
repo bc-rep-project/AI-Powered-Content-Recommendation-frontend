@@ -1,4 +1,4 @@
-export { LoadingSpinner } from './LoadingSpinner';
+export { default as LoadingSpinner } from './LoadingSpinner';
 export { ErrorAlert } from './ErrorAlert';
 export { ErrorBoundary } from './ErrorBoundary';
 export { PasswordInput } from './PasswordInput';
