@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { API_ENDPOINTS, handleApiError, apiFetch } from '@/config/api.config';
-import LoadingSpinner from '@/components/LoadingSpinner';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { dummyContent } from '@/utils/dummyData';
 
 interface Content {
