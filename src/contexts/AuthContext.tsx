@@ -1,35 +1,22 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { API_ENDPOINTS } from '@/config/api.config';
+import React from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { User, AuthResponse } from '@/types';
+import { authService } from '@/services/auth.service';
 
-interface User {
-  id: string;
-  email: string;
-  username: string;
-}
-
-interface AuthContextType {
+type AuthContextType = {
   user: User | null;
   isLoading: boolean;
-  login: (token: string) => Promise<void>;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-}
-
-const defaultContext: AuthContextType = {
-  user: null,
-  isLoading: true,
-  login: async () => {},
-  logout: () => {},
+  loginWithProvider: (provider: 'google' | 'github' | 'facebook') => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType>(defaultContext);
+const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,8 +25,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const checkAuth = async () => {
-    if (typeof window === 'undefined') return;
-
     const token = localStorage.getItem('token');
     if (!token) {
       setIsLoading(false);
@@ -47,19 +32,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
-      const response = await fetch(API_ENDPOINTS.me, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else {
-        throw new Error('Auth check failed');
-      }
+      const user = await authService.validateToken(token);
+      setUser(user);
     } catch (error) {
       console.error('Auth check failed:', error);
       localStorage.removeItem('token');
@@ -68,23 +42,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const login = async (token: string) => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('token', token);
-    await checkAuth();
+  const contextValue = {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    login: async (email: string, password: string) => {
+      const response = await authService.login({ email, password });
+      setUser(response.user);
+      localStorage.setItem('token', response.access_token);
+    },
+    logout: () => {
+      localStorage.removeItem('token');
+      setUser(null);
+    },
+    loginWithProvider: async (provider: 'google' | 'github' | 'facebook') => {
+      await authService.loginWithProvider(provider);
+    },
   };
 
-  const logout = () => {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem('token');
-    setUser(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
@@ -93,4 +69,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}

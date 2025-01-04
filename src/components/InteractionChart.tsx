@@ -10,7 +10,8 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import { recommendationService, type InteractionData } from '../services/api';
+import type { InteractionData } from '@/types';
+import { recommendationService } from '@/services/recommendation.service';
 
 ChartJS.register(
   CategoryScale,

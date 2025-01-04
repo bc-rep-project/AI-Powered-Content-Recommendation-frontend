@@ -1,17 +1,12 @@
 import React from 'react';
-import { ThemeProvider } from '../contexts/ThemeContext';
-import { Layout } from '../components/Layout';
-import '../styles/globals.css';
-import type { AppProps } from 'next/app';
+import { AppProps } from 'next/app';
+import { AuthProvider } from '../src/contexts/AuthContext';
+import '@/styles/globals.css';
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ThemeProvider>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </ThemeProvider>
+    <AuthProvider>
+      <Component {...pageProps} />
+    </AuthProvider>
   );
 }
-
-export default MyApp;
