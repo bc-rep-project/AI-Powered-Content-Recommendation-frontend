@@ -1,20 +1,23 @@
 import { rest } from 'msw';
-import { API_ENDPOINTS } from '../../config/api';
+import { env } from '@/config/env.config';
 
 export const handlers = [
-    rest.get(
-        `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.recommendations}`,
-        (req, res, ctx) => {
-            return res(
-                ctx.json([
+    rest.get(`${env.API_URL}/api/recommendations`, (req, res, ctx) => {
+        return res(
+            ctx.status(200),
+            ctx.json({
+                data: [
                     {
-                        content_id: '1',
+                        id: '1',
                         title: 'Test Recommendation',
                         description: 'Test Description',
-                        score: 0.95,
-                    }
-                ])
-            );
-        }
-    ),
+                        category: 'AI & ML',
+                        rating: 4.5,
+                        tags: ['ai', 'ml'],
+                        createdAt: new Date().toISOString(),
+                    },
+                ],
+            })
+        );
+    }),
 ]; 
