@@ -1,3 +1,5 @@
+'use client';
+
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
 import { RecommendationFilter, RecommendationGrid } from '@/features/recommendations';
@@ -24,8 +26,7 @@ export default function DashboardPage() {
           recommendations={recommendations}
           onLearnMore={handleLearnMore}
         />
-        <MobileNavigation />
-            </div>
+      </div>
     </ErrorBoundary>
   );
 }
