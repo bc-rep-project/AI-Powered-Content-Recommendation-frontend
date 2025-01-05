@@ -1,3 +1,5 @@
+export { Sidebar } from './layout/Sidebar';
+export { MobileNavigation } from './layout/MobileNavigation';
 export { LoadingSpinner } from './LoadingSpinner';
 export { ErrorAlert } from './ErrorAlert';
 export { ErrorBoundary } from './ErrorBoundary';

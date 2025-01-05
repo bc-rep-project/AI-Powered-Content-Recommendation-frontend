@@ -1,21 +1,8 @@
 'use client';
 
 import { ThemeToggle } from '@/components/common/ThemeToggle';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiHome, FiCompass, FiBookmark, FiUser } from 'react-icons/fi';
-
-interface NavLinkProps {
-  href: string;
-  children: React.ReactNode;
-  className?: string;
-}
-
-const NavLink = ({ href, children, className }: NavLinkProps) => (
-  <a href={href} className={className}>
-    {children}
-  </a>
-);
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -34,7 +21,7 @@ export const Sidebar = () => {
       </div>
       <nav className="flex-1 px-2">
         {navItems.map(({ href, icon: Icon, label }) => (
-          <NavLink 
+          <a 
             key={href}
             href={href}
             className={`flex items-center px-4 py-2 mt-2 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-dark-border ${
@@ -43,7 +30,7 @@ export const Sidebar = () => {
           >
             <Icon className="w-5 h-5 mr-3" />
             {label}
-          </NavLink>
+          </a>
         ))}
       </nav>
       <div className="p-4">
