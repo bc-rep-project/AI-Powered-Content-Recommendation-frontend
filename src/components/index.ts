@@ -7,6 +7,6 @@ export { PageTransition } from './PageTransition';
 export { AnimatedButton } from './AnimatedButton';
 export { AnimatedLink } from './AnimatedLink';
 export { LoadingOverlay } from './LoadingOverlay';
-export { Layout } from './Layout/Layout';
-export { Navbar } from './Layout/Navbar';
+export { Layout } from './layout/Layout';
+export { Navbar } from './layout/Navbar';
 export { SuccessIcon } from './SuccessIcon'; 

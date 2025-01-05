@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, AuthResponse } from '@/types';
 import { authService } from '@/services/auth.service';
 
@@ -14,9 +13,18 @@ type AuthContextType = {
   loginWithProvider: (provider: 'google' | 'github' | 'facebook') => Promise<void>;
 };
 
-const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
+const defaultContext: AuthContextType = {
+  user: null,
+  isLoading: true,
+  isAuthenticated: false,
+  login: async () => {},
+  logout: () => {},
+  loginWithProvider: async () => {},
+};
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+const AuthContext = createContext<AuthContextType>(defaultContext);
+
+export const AuthProvider = ({ children }: React.PropsWithChildren<{}>) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const contextValue = {
+  const contextValue: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user,
@@ -61,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
-}
+};
 
 export function useAuth() {
   const context = useContext(AuthContext);
