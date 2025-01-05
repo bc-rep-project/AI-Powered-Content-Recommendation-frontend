@@ -2,73 +2,107 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 transition-colors duration-200
+           dark:bg-dark-bg dark:text-dark-text;
+  }
+}
+
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 
-           transition-colors duration-200 focus:outline-none focus:ring-2 
-           focus:ring-primary-500 focus:ring-offset-2;
+    @apply px-4 py-2 bg-primary-600 text-white rounded-md 
+           hover:bg-primary-700 transition-colors duration-200 
+           focus:outline-none focus:ring-2 focus:ring-primary-500 
+           focus:ring-offset-2 dark:ring-offset-dark-bg
+           disabled:opacity-50 disabled:cursor-not-allowed
+           w-full sm:w-auto;
   }
   
   .btn-secondary {
-    @apply px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 
-           transition-colors duration-200 focus:outline-none focus:ring-2 
-           focus:ring-gray-400 focus:ring-offset-2;
+    @apply px-4 py-2 bg-gray-200 text-gray-800 rounded-md 
+           hover:bg-gray-300 transition-colors duration-200 
+           focus:outline-none focus:ring-2 focus:ring-gray-400 
+           focus:ring-offset-2 dark:bg-dark-card dark:text-dark-text 
+           dark:hover:bg-dark-border dark:ring-offset-dark-bg
+           w-full sm:w-auto;
   }
 
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md 
+           shadow-sm focus:outline-none focus:ring-2 
+           focus:ring-primary-500 focus:border-primary-500
+           dark:bg-dark-card dark:border-dark-border 
+           dark:text-dark-text dark:focus:ring-primary-400
+           dark:placeholder-gray-400;
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white rounded-lg shadow-md p-4 sm:p-6
+           dark:bg-dark-card dark:border dark:border-dark-border;
   }
 
-  .section-title {
-    @apply text-2xl font-bold text-gray-900 mb-4;
+  .mobile-menu {
+    @apply fixed inset-0 z-50 transform transition-transform duration-300 ease-in-out
+           lg:hidden bg-white dark:bg-dark-bg;
   }
+
+  .mobile-menu.open {
+    @apply translate-x-0;
+  }
+
+  .mobile-menu.closed {
+    @apply -translate-x-full;
+  }
+}
+
+/* Responsive container */
+.container {
+  @apply px-4 mx-auto max-w-7xl sm:px-6 lg:px-8;
+}
+
+/* Mobile-first grid */
+.grid-cols-responsive {
+  @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+/* Dark mode transitions */
+.dark-transition {
+  @apply transition-colors duration-200;
+}
+
+/* Mobile navigation */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-card
+         border-t border-gray-200 dark:border-dark-border
+         flex justify-around items-center p-3
+         lg:hidden;
+}
+
+/* Responsive typography */
+.text-responsive {
+  @apply text-sm sm:text-base lg:text-lg;
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+@media (min-width: 640px) {
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-dark-border;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded-full hover:bg-gray-500
+           dark:bg-gray-600 dark:hover:bg-gray-500;
+  }
 }
 
-::-webkit-scrollbar-track {
-  @apply bg-gray-100;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 rounded-full hover:bg-gray-500;
-}
-
-/* Base styles */
-body {
-  @apply bg-gray-50 text-gray-900 min-h-screen;
-}
-
-/* Loading animations */
-.loading-skeleton {
-  @apply animate-pulse bg-gray-200 rounded;
-}
-
-/* Transitions */
-.page-transition {
-  @apply transition-opacity duration-300;
-}
-
-.page-enter {
-  @apply opacity-0;
-}
-
-.page-enter-active {
-  @apply opacity-100;
-}
-
-.page-exit {
-  @apply opacity-100;
-}
-
-.page-exit-active {
-  @apply opacity-0;
+/* Hide scrollbar for mobile */
+@media (max-width: 639px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
 } 

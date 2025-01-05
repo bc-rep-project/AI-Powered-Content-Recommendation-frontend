@@ -5,6 +5,7 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -20,10 +21,16 @@ module.exports = {
           800: '#075985',
           900: '#0c4a6e',
         },
+        dark: {
+          bg: '#121212',
+          card: '#1E1E1E',
+          border: '#2D2D2D',
+          text: '#E5E5E5',
+        }
       },
-      animation: {
-        'spin-slow': 'spin 3s linear infinite',
-      }
+      screens: {
+        'xs': '475px',
+      },
     },
   },
   plugins: [],
