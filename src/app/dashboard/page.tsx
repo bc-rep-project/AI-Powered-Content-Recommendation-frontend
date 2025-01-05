@@ -25,8 +25,8 @@ export default function DashboardPage() {
         <RecommendationGrid 
           recommendations={recommendations}
           onLearnMore={handleLearnMore}
-        />
-      </div>
+                    />
+                  </div>
     </ErrorBoundary>
   );
 }
