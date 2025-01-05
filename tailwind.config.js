@@ -1,28 +1,30 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class',
   content: [
-    './pages/**/*.{js,ts,jsx,tsx}',
-    './components/**/*.{js,ts,jsx,tsx}',
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        // Light mode colors
         primary: {
-          light: '#60A5FA',
-          DEFAULT: '#3B82F6',
-          dark: '#2563EB',
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
         },
-        // Dark mode specific colors
-        dark: {
-          bg: '#121212',
-          paper: '#1E1E1E',
-          primary: '#90CAF9',
-          secondary: '#BB86FC',
-        }
+      },
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
       }
-    }
+    },
   },
   plugins: [],
 } 
