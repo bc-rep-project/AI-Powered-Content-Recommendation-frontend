@@ -22,4 +22,4 @@ export function ThemeToggle(): JSX.Element | null {
       </span>
     </button>
   );
-} 
+}
