@@ -1,11 +1,6 @@
+import * as React from 'react';
 import type { AppProps } from 'next/app';
-import { ThemeProvider } from 'next-themes';
-import '@/styles/globals.css';
 
-export default function App({ Component, pageProps }: AppProps) {
-  return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <Component {...pageProps} />
-    </ThemeProvider>
-  );
+export default function App({ Component, pageProps }: AppProps): React.ReactElement {
+  return React.createElement(Component, pageProps);
 } 
