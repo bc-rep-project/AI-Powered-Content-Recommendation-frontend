@@ -2,13 +2,13 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Layout from '@/components/layout';
-import { ThemeProvider } from '@/providers/ThemeProvider';
+import { ThemeProvider } from 'next-themes';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'AI Content Recommendations',
-  description: 'Discover personalized content through advanced AI recommendations',
+  description: 'Personalized content recommendations powered by AI'
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Layout>{children}</Layout>
         </ThemeProvider>
       </body>
