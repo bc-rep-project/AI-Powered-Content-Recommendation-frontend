@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Sidebar, MobileNavigation } from '@/components/layout';
+import Layout from '@/components/layout';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -20,13 +20,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <div className="flex h-screen bg-gray-50 dark:bg-dark-bg">
-            <Sidebar />
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
-            <MobileNavigation />
-          </div>
+          <Layout>{children}</Layout>
         </ThemeProvider>
       </body>
     </html>
