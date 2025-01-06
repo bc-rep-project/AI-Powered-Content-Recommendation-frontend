@@ -1,10 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['next-themes'],
-  experimental: {
-    appDir: true
-  }
+  transpilePackages: ['next-themes']
 };
 
 module.exports = nextConfig;
