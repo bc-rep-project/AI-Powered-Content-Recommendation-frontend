@@ -1,8 +1,8 @@
 'use client';
 
-import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { usePathname } from 'next/navigation';
 import { FiHome, FiCompass, FiBookmark, FiUser } from 'react-icons/fi';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 export const Sidebar = () => {
   const pathname = usePathname();
