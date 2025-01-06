@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Layout } from '../components/layout';
+import Layout from '@/components/layout/Layout';
 import { ThemeProvider } from '../components/providers/ThemeProvider';
 import type { ReactNode } from 'react';
 
