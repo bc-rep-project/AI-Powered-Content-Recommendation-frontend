@@ -1,9 +1,9 @@
 'use client';
 
-import { ReactElement } from 'react';
+import * as React from 'react';
 
 interface LayoutProps {
-    children: JSX.Element | JSX.Element[];
+    children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
