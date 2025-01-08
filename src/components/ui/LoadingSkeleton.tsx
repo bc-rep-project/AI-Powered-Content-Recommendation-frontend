@@ -1,7 +1,9 @@
-import React from 'react';
+'use client';
+
+import * as React from 'react';
 
 interface StackProps {
-  children: JSX.Element | JSX.Element[];
+  children: React.ReactNode;
   spacing?: number;
 }
 
