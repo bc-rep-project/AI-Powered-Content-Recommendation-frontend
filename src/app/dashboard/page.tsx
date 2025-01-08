@@ -1,32 +1,14 @@
 'use client';
 
-import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { MobileNavigation } from '@/components/layout/MobileNavigation';
-import { RecommendationFilter, RecommendationGrid } from '@/features/recommendations';
-import { useRecommendations } from '@/features/recommendations/hooks/useRecommendations';
-import { useState } from 'react';
-import { RecommendationFilter as FilterType } from '@/features/recommendations/types';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 export default function DashboardPage() {
-  const { recommendations, isLoading, error } = useRecommendations();
-  const [filter, setFilter] = useState<FilterType>({});
-
-  const handleLearnMore = (id: string) => {
-    // Handle navigation or modal open
-  };
-
   return (
     <ErrorBoundary>
       <div className="container pb-16 pt-4">
-        <RecommendationFilter 
-          filter={filter}
-          onFilterChange={setFilter}
-        />
-        <RecommendationGrid 
-          recommendations={recommendations}
-          onLearnMore={handleLearnMore}
-                    />
-                  </div>
+        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+        <p className="text-gray-600">Welcome to your personalized dashboard</p>
+      </div>
     </ErrorBoundary>
   );
 }

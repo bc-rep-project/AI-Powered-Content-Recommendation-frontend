@@ -4,19 +4,10 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-rgb: 249, 250, 251;
+  --background-rgb: 255, 255, 255;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
-}
-
-/* Fix for LoadingSpinner color classes */
-.border-blue-600 {
-  border-color: #2563eb;
-}
-
-.border-t-transparent {
-  border-top-color: transparent;
 } 

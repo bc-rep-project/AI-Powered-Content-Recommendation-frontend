@@ -1,7 +1,6 @@
 'use client';
 
-import { PropsWithChildren, ReactNode } from 'react';
-import { PageTransition } from '../PageTransition';
+import { ReactNode } from 'react';
 
 interface LayoutProps {
     children: ReactNode;
@@ -9,10 +8,10 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
     return (
-        <PageTransition className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
             <main className="container mx-auto px-4 py-8">
                 {children}
             </main>
-        </PageTransition>
+        </div>
     );
 } 

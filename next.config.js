@@ -1,16 +1,23 @@
 /** @type {import('next').NextConfig} */
-const path = require('path');
-
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['next-themes'],
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.join(__dirname, 'src')
-    };
-    return config;
+  experimental: {
+    optimizePackageImports: ['@/components']
+  },
+  images: {
+    domains: ['images.unsplash.com', 'avatars.githubusercontent.com'],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: process.env.NEXT_PUBLIC_API_URL + '/:path*',
+      },
+    ]
+  },
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   }
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
