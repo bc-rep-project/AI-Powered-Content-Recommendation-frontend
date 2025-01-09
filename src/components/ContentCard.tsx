@@ -1,13 +1,18 @@
+'use client';
+
 import React from 'react';
+import type { StaticImageData } from 'next/image';
 import Image from 'next/image';
 import { FiClock, FiHeart, FiBookmark, FiShare2 } from 'react-icons/fi';
 
-interface ContentCardProps {
+export type ContentType = 'article' | 'video' | 'product';
+
+export interface ContentCardProps {
   id: number;
   title: string;
   description: string;
-  type: 'article' | 'video' | 'product';
-  imageUrl: string;
+  type: ContentType;
+  imageUrl: string | StaticImageData;
   metadata: {
     author?: string;
     readTime?: number;
@@ -34,9 +39,9 @@ export default function ContentCard({
         <Image
           src={imageUrl}
           alt={title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          width={500}
+          height={192}
+          className="object-cover w-full h-full"
         />
         <div className="absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
           {Math.round(score * 100)}% Match

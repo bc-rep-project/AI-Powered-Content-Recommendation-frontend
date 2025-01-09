@@ -1,12 +1,6 @@
 'use client';
 
-import * as React from 'react';
-
-interface LayoutProps {
-    children: React.ReactNode;
-}
-
-export function Layout({ children }: LayoutProps) {
+const Layout = ({ children }: { children: any }) => {
     return (
         <div className="min-h-screen bg-white">
             <main className="container mx-auto px-4 py-8">
@@ -14,4 +8,6 @@ export function Layout({ children }: LayoutProps) {
             </main>
         </div>
     );
-} 
+};
+
+export default Layout; 

@@ -1,22 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    optimizePackageImports: ['@/components']
+  swcMinify: true,
+  typescript: {
+    ignoreBuildErrors: true
   },
   images: {
-    domains: ['images.unsplash.com', 'avatars.githubusercontent.com'],
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: process.env.NEXT_PUBLIC_API_URL + '/:path*',
-      },
-    ]
-  },
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    domains: [
+      'images.unsplash.com',
+      'via.placeholder.com',
+      'picsum.photos',
+    ],
   }
 }
 

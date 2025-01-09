@@ -5,25 +5,17 @@
 
 # testing
 /coverage
-/.nyc_output
 
 # next.js
 /.next/
 /out/
-/build
 
 # production
 /build
-/dist
 
 # misc
 .DS_Store
 *.pem
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
 # debug
 npm-debug.log*
@@ -32,6 +24,9 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env.development
+.env.test
+.env.production
 
 # vercel
 .vercel
@@ -44,8 +39,4 @@ next-env.d.ts
 .idea
 .vscode
 *.swp
-*.swo
-
-# cache
-.eslintcache
-.cache 
+*.swo 
