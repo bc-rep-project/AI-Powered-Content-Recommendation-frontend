@@ -107,15 +107,11 @@ export const userApi = {
     },
     
     register: async (userData: any) => {
-        try {
-            const response = await api.post('/auth/register', userData);
-            return response.data;
-        } catch (error) {
-            if (error.code === 'INVALID_RESPONSE') {
-                console.error('Server returned invalid response format');
-            }
-            throw error;
+        const response = await api.post('/auth/register', userData);
+        if (response.data.access_token) {
+            localStorage.setItem('auth_token', response.data.access_token);
         }
+        return response.data;
     },
     
     getProfile: async () => {
