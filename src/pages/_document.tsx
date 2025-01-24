@@ -8,6 +8,7 @@ export default function Document() {
           httpEquiv="Content-Security-Policy" 
           content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.render.com https://*.vercel.app;" 
         />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <body>
         <Main />
