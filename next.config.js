@@ -19,11 +19,15 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; " +
-              "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; " +
-              "style-src 'self' 'unsafe-inline'; " +
-              "img-src 'self' data: blob:; " +
-              "connect-src 'self' https://*.onrender.com https://ai-recommendation-api.onrender.com;"
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https:",
+              "connect-src 'self' https://*.onrender.com https://ai-recommendation-api.onrender.com",
+              "frame-ancestors 'none'",
+              "base-uri 'self'"
+            ].join('; ')
           }
         ],
       },
