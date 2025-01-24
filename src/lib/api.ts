@@ -8,7 +8,12 @@ export const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true  // Important for CORS with credentials
+    withCredentials: true,
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+    }
 });
 
 // Add request interceptor for authentication
@@ -17,6 +22,9 @@ api.interceptors.request.use((config) => {
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
+    config.headers['Access-Control-Allow-Origin'] = '*';
+    config.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS';
+    config.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
     return config;
 });
 
@@ -24,6 +32,24 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     response => response,
     error => {
+        if (error.response?.status === 503) {
+            console.error('Service temporarily unavailable');
+            return Promise.reject({
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'Service is temporarily unavailable. Please try again later.',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        if (error.code === 'ECONNABORTED') {
+            console.error('Request timeout');
+            return Promise.reject({
+                code: 'TIMEOUT',
+                message: 'Request timed out. Please check your connection.',
+                timestamp: new Date().toISOString()
+            });
+        }
+
         // Handle empty responses
         if (error.response?.status === 204 || error.response?.data === '') {
             return Promise.reject({
