@@ -22,9 +22,29 @@ api.interceptors.request.use((config) => {
 
 // Add response interceptor for error handling
 api.interceptors.response.use(
-    response => response,
+    response => {
+        // Handle empty responses
+        if (!response.data && response.status !== 204) {
+            return Promise.reject({
+                code: 'EMPTY_RESPONSE',
+                message: 'Server returned an empty response',
+                timestamp: new Date().toISOString()
+            });
+        }
+        return response;
+    },
     error => {
-        if (error.response?.status === 503) {
+        // Handle network errors
+        if (!error.response) {
+            return Promise.reject({
+                code: 'NETWORK_ERROR',
+                message: 'Network error occurred',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // Handle service unavailable
+        if (error.response.status === 503) {
             console.error('Service temporarily unavailable');
             return Promise.reject({
                 code: 'SERVICE_UNAVAILABLE',
@@ -33,16 +53,23 @@ api.interceptors.response.use(
             });
         }
         
+        // Handle authentication errors
+        if (error.response.status === 401) {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/login';
+            return Promise.reject({
+                code: 'UNAUTHORIZED',
+                message: 'Please log in to continue',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // Handle other errors
         const message = error.response?.data?.detail || 
             error.message || 'Unknown error occurred';
         
-        if (error.response?.status === 401) {
-            localStorage.removeItem('auth_token');
-            window.location.href = '/login';
-        }
-        
         return Promise.reject({
-            code: error.response?.status || 'NETWORK_ERROR',
+            code: error.response?.status || 'UNKNOWN_ERROR',
             message,
             timestamp: new Date().toISOString()
         });
@@ -52,8 +79,13 @@ api.interceptors.response.use(
 // Content-related API calls
 export const contentApi = {
     getRecommendations: async () => {
-        const response = await api.get('/recommendations');
-        return response.data;
+        try {
+            const response = await api.get('/recommendations');
+            return response.data || { recommendations: [] }; // Provide default value
+        } catch (error) {
+            console.error('Error fetching recommendations:', error);
+            return { recommendations: [] }; // Return empty recommendations on error
+        }
     },
     
     getContent: async (contentId: string) => {
