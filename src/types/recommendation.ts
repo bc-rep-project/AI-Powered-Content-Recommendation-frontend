@@ -1,10 +1,15 @@
 export interface Recommendation {
-    id: string;
+    content_id: string;
     title: string;
     description: string;
+    type: 'article' | 'video' | 'product';
+    image_url: string;
     metadata: {
-        tags: string[];
-        readTime: string;
+        author?: string;
+        readTime?: number;
+        price?: number;
+        category?: string;
+        publishedAt?: string;
     };
-    created_at: string;
+    score: number;
 } 
