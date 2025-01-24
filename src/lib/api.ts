@@ -18,6 +18,26 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// Add response interceptor for error handling
+api.interceptors.response.use(
+    response => response,
+    error => {
+        const message = error.response?.data?.detail || 
+            error.message || 'Unknown error occurred';
+        
+        if (error.response?.status === 401) {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/login';
+        }
+        
+        return Promise.reject({
+            code: error.response?.status || 'NETWORK_ERROR',
+            message,
+            timestamp: new Date().toISOString()
+        });
+    }
+);
+
 // Content-related API calls
 export const contentApi = {
     getRecommendations: async () => {
@@ -36,13 +56,24 @@ export const contentApi = {
             ...feedback
         });
         return response.data;
+    },
+    
+    trackInteraction: async (contentId: string, type: string) => {
+        const response = await api.post('/interactions', {
+            content_id: contentId,
+            type: type
+        });
+        return response.data;
     }
 };
 
 // User-related API calls
 export const userApi = {
     login: async (email: string, password: string) => {
-        const response = await api.post('/auth/login', { email, password });
+        const response = await api.post('/auth/token', 
+            `username=${email}&password=${password}`,
+            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}
+        );
         return response.data;
     },
     

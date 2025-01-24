@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { StaticImageData } from 'next/image';
 import Image from 'next/image';
 import { FiClock, FiHeart, FiBookmark, FiShare2 } from 'react-icons/fi';
@@ -21,8 +21,10 @@ export interface ContentCardProps {
     publishedAt?: string;
   };
   score: number;
-  onInteraction?: (type: 'like' | 'bookmark' | 'share') => void;
+  onInteraction?: (type: InteractionType) => Promise<void>;
 }
+
+export type InteractionType = 'like' | 'bookmark' | 'share';
 
 export default function ContentCard({
   title,
@@ -33,6 +35,35 @@ export default function ContentCard({
   score,
   onInteraction,
 }: ContentCardProps) {
+  const [localScore, setLocalScore] = useState(score);
+  const [isLoading, setIsLoading] = useState<Record<InteractionType, boolean>>({
+    like: false,
+    bookmark: false,
+    share: false
+  });
+
+  const handleInteraction = async (interactionType: InteractionType) => {
+    try {
+      if (!onInteraction) return;
+      
+      setIsLoading(prev => ({ ...prev, [interactionType]: true }));
+      
+      // Immediate UI feedback
+      const prevScore = localScore;
+      setLocalScore(prev => Math.min(prev + 0.05, 1));
+      
+      await onInteraction(interactionType);
+      
+    } catch (error) {
+      // Revert score on error
+      console.error('Interaction failed:', error);
+      setLocalScore(prevScore);
+      // You might want to show a toast notification here
+    } finally {
+      setIsLoading(prev => ({ ...prev, [interactionType]: false }));
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-dark-card rounded-lg shadow-md overflow-hidden transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg">
       <div className="relative h-48 w-full">
@@ -44,7 +75,7 @@ export default function ContentCard({
           className="object-cover w-full h-full"
         />
         <div className="absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
-          {Math.round(score * 100)}% Match
+          {Math.round(localScore * 100)}% Match
         </div>
       </div>
 
@@ -88,22 +119,25 @@ export default function ContentCard({
 
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => onInteraction?.('like')}
-              className="p-1 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+              onClick={() => handleInteraction('like')}
+              disabled={isLoading.like}
+              className="p-1 hover:text-primary-500 dark:hover:text-primary-400 transition-colors disabled:opacity-50"
               aria-label="Like"
             >
               <FiHeart className="h-5 w-5" />
             </button>
             <button
-              onClick={() => onInteraction?.('bookmark')}
-              className="p-1 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+              onClick={() => handleInteraction('bookmark')}
+              disabled={isLoading.bookmark}
+              className="p-1 hover:text-primary-500 dark:hover:text-primary-400 transition-colors disabled:opacity-50"
               aria-label="Bookmark"
             >
               <FiBookmark className="h-5 w-5" />
             </button>
             <button
-              onClick={() => onInteraction?.('share')}
-              className="p-1 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+              onClick={() => handleInteraction('share')}
+              disabled={isLoading.share}
+              className="p-1 hover:text-primary-500 dark:hover:text-primary-400 transition-colors disabled:opacity-50"
               aria-label="Share"
             >
               <FiShare2 className="h-5 w-5" />

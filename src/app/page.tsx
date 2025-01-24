@@ -1,72 +1,33 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import ContentCard from '@/components/ContentCard';
-import { type ContentType } from '@/components/ContentCard';
+import { contentApi } from '@/lib/api';
+import { type Recommendation } from '@/types/recommendation';
+import type { ContentType } from '@/components/ContentCard';
 
 export default function Home() {
-  // Example content items
-  const contentItems: Array<{
-    id: number;
-    title: string;
-    description: string;
-    type: ContentType;
-    imageUrl: string;
-    metadata: {
-      author?: string;
-      readTime?: number;
-      price?: number;
-      category?: string;
-      publishedAt?: string;
-    };
-    score: number;
-  }> = [
-    {
-      id: 1,
-      title: "Understanding AI in 2024",
-      description: "A comprehensive guide to artificial intelligence and its impact on modern technology.",
-      type: "article",
-      imageUrl: "https://picsum.photos/800/600?random=1",
-      metadata: {
-        author: "Dr. Jane Smith",
-        readTime: 8,
-        category: "Technology",
-        publishedAt: "2024-01-08",
-      },
-      score: 0.95,
-    },
-    {
-      id: 2,
-      title: "Machine Learning Basics",
-      description: "Learn the fundamentals of machine learning with practical examples.",
-      type: "video",
-      imageUrl: "https://picsum.photos/800/600?random=2",
-      metadata: {
-        author: "Tech Academy",
-        readTime: 15,
-        category: "Education",
-        publishedAt: "2024-01-07",
-      },
-      score: 0.88,
-    },
-    {
-      id: 3,
-      title: "Data Science Toolkit",
-      description: "Essential tools and software for modern data science workflows.",
-      type: "product",
-      imageUrl: "https://picsum.photos/800/600?random=3",
-      metadata: {
-        price: 99.99,
-        category: "Software",
-        publishedAt: "2024-01-06",
-      },
-      score: 0.92,
-    },
-  ];
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
-  const handleInteraction = (type: 'like' | 'bookmark' | 'share') => {
-    console.log(`Interaction: ${type}`);
-    // Add interaction handling logic here
-  };
+  useEffect(() => {
+    const loadRecommendations = async () => {
+      try {
+        const data = await contentApi.getRecommendations();
+        setRecommendations(data.recommendations);
+      } catch (err) {
+        setError('Failed to load recommendations');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadRecommendations();
+  }, []);
+
+  if (loading) return <div className="text-center py-8">Loading recommendations...</div>;
+  if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
 
   return (
     <div className="space-y-8">
@@ -82,11 +43,17 @@ export default function Home() {
 
       {/* Content Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {contentItems.map((item) => (
+        {recommendations.map((item) => (
           <ContentCard
-            key={item.id}
-            {...item}
-            onInteraction={handleInteraction}
+            key={item.content_id}
+            id={parseInt(item.content_id)}
+            title={item.title}
+            description={item.description}
+            type={item.type as ContentType}
+            imageUrl={item.image_url}
+            metadata={item.metadata}
+            score={item.score}
+            onInteraction={type => contentApi.trackInteraction(item.content_id, type)}
           />
         ))}
       </section>
