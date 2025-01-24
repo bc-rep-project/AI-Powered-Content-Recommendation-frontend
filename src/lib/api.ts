@@ -8,6 +8,7 @@ export const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true  // Important for CORS with credentials
 });
 
 // Add request interceptor for authentication
@@ -23,6 +24,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     response => response,
     error => {
+        if (error.response?.status === 503) {
+            console.error('Service temporarily unavailable');
+            return Promise.reject({
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'Service is temporarily unavailable. Please try again later.',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
         const message = error.response?.data?.detail || 
             error.message || 'Unknown error occurred';
         
