@@ -89,7 +89,10 @@ export const userApi = {
     },
     
     register: async (userData: any) => {
-        const response = await api.post('/auth/register', userData);
+        const response = await api.post(
+            '/auth/register',  // Use backend endpoint directly
+            userData
+        );
         return response.data;
     },
     

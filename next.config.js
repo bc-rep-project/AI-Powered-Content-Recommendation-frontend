@@ -19,7 +19,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.onrender.com https://*.vercel.app;"
+            value: "default-src 'self'; " +
+              "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; " +
+              "style-src 'self' 'unsafe-inline'; " +
+              "img-src 'self' data: blob:; " +
+              "connect-src 'self' https://*.onrender.com https://ai-recommendation-api.onrender.com;"
           }
         ],
       },
