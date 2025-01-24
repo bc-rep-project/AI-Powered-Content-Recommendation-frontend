@@ -22,54 +22,40 @@ api.interceptors.request.use((config) => {
 
 // Add response interceptor for error handling
 api.interceptors.response.use(
-    response => {
-        // Handle empty responses
-        if (!response.data && response.status !== 204) {
-            return Promise.reject({
-                code: 'EMPTY_RESPONSE',
-                message: 'Server returned an empty response',
-                timestamp: new Date().toISOString()
-            });
-        }
-        return response;
-    },
+    response => response,
     error => {
-        // Handle network errors
-        if (!error.response) {
+        // Handle empty responses
+        if (error.response?.status === 204 || error.response?.data === '') {
             return Promise.reject({
-                code: 'NETWORK_ERROR',
-                message: 'Network error occurred',
+                code: 'NO_CONTENT',
+                message: 'No content available',
                 timestamp: new Date().toISOString()
             });
         }
 
-        // Handle service unavailable
-        if (error.response.status === 503) {
-            console.error('Service temporarily unavailable');
-            return Promise.reject({
-                code: 'SERVICE_UNAVAILABLE',
-                message: 'Service is temporarily unavailable. Please try again later.',
-                timestamp: new Date().toISOString()
-            });
-        }
-        
-        // Handle authentication errors
-        if (error.response.status === 401) {
-            localStorage.removeItem('auth_token');
-            window.location.href = '/login';
-            return Promise.reject({
-                code: 'UNAUTHORIZED',
-                message: 'Please log in to continue',
-                timestamp: new Date().toISOString()
-            });
+        // Handle invalid JSON responses
+        if (error.response && typeof error.response.data === 'string') {
+            try {
+                error.response.data = JSON.parse(error.response.data);
+            } catch (e) {
+                return Promise.reject({
+                    code: 'INVALID_RESPONSE',
+                    message: 'Received invalid response format',
+                    timestamp: new Date().toISOString()
+                });
+            }
         }
 
-        // Handle other errors
         const message = error.response?.data?.detail || 
             error.message || 'Unknown error occurred';
         
+        if (error.response?.status === 401) {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/login';
+        }
+        
         return Promise.reject({
-            code: error.response?.status || 'UNKNOWN_ERROR',
+            code: error.response?.status || 'NETWORK_ERROR',
             message,
             timestamp: new Date().toISOString()
         });
@@ -79,13 +65,8 @@ api.interceptors.response.use(
 // Content-related API calls
 export const contentApi = {
     getRecommendations: async () => {
-        try {
-            const response = await api.get('/recommendations');
-            return response.data || { recommendations: [] }; // Provide default value
-        } catch (error) {
-            console.error('Error fetching recommendations:', error);
-            return { recommendations: [] }; // Return empty recommendations on error
-        }
+        const response = await api.get('/recommendations');
+        return response.data;
     },
     
     getContent: async (contentId: string) => {
@@ -107,7 +88,12 @@ export const contentApi = {
             type: type
         });
         return response.data;
-    }
+    },
+    
+    getWikipediaContent: async (search: string) => {
+        const response = await api.get(`/external/wikipedia?search=${encodeURIComponent(search)}`);
+        return response.data;
+    },
 };
 
 // User-related API calls
@@ -121,8 +107,15 @@ export const userApi = {
     },
     
     register: async (userData: any) => {
-        const response = await api.post('/auth/register', userData);
-        return response.data;
+        try {
+            const response = await api.post('/auth/register', userData);
+            return response.data;
+        } catch (error) {
+            if (error.code === 'INVALID_RESPONSE') {
+                console.error('Server returned invalid response format');
+            }
+            throw error;
+        }
     },
     
     getProfile: async () => {

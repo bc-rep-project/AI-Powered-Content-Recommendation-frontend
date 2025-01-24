@@ -22,9 +22,17 @@ export interface ContentCardProps {
   };
   score: number;
   onInteraction?: (type: InteractionType) => Promise<void>;
+  content?: WikipediaResult;
 }
 
 export type InteractionType = 'like' | 'bookmark' | 'share';
+
+interface WikipediaResult {
+  title: string;
+  snippet: string;
+  url: string;
+  pageid: string;
+}
 
 export default function ContentCard({
   title,
@@ -34,6 +42,7 @@ export default function ContentCard({
   metadata,
   score,
   onInteraction,
+  content
 }: ContentCardProps) {
   const [localScore, setLocalScore] = useState(score);
   const [isLoading, setIsLoading] = useState<Record<InteractionType, boolean>>({
@@ -63,6 +72,32 @@ export default function ContentCard({
       setIsLoading(prev => ({ ...prev, [interactionType]: false }));
     }
   };
+
+  const cleanHtml = (html: string) => {
+    return html.replace(/<[^>]+>/g, '');
+  };
+
+  // Render Wikipedia content if provided
+  if (content) {
+    return (
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="p-4">
+          <h3 className="text-lg font-semibold">{content.title}</h3>
+          <p className="text-gray-600 mt-2">
+            {cleanHtml(content.snippet)}...
+          </p>
+          <a
+            href={content.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-block text-blue-600 hover:text-blue-800"
+          >
+            Read more on Wikipedia
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-dark-card rounded-lg shadow-md overflow-hidden transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg">
@@ -96,7 +131,7 @@ export default function ContentCard({
         </h3>
 
         <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-          {description}
+          {cleanHtml(description)}
         </p>
 
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">

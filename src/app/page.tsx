@@ -5,11 +5,14 @@ import ContentCard from '@/components/ContentCard';
 import { contentApi } from '@/lib/api';
 import { type Recommendation } from '@/types/recommendation';
 import type { ContentType } from '@/components/ContentCard';
+import type { WikipediaResult } from '@/components/ContentCard';
 
 export default function Home() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [wikiContent, setWikiContent] = useState<WikipediaResult[]>([]);
+  const [searchQuery, setSearchQuery] = useState("Artificial Intelligence");
 
   useEffect(() => {
     const loadRecommendations = async () => {
@@ -25,6 +28,19 @@ export default function Home() {
     };
     loadRecommendations();
   }, []);
+
+  useEffect(() => {
+    const fetchWikipedia = async () => {
+      try {
+        const response = await contentApi.getWikipediaContent(searchQuery);
+        setWikiContent(response.results);
+      } catch (error) {
+        console.error("Failed to load Wikipedia content:", error);
+      }
+    };
+    
+    fetchWikipedia();
+  }, [searchQuery]);
 
   if (loading) return <div className="text-center py-8">Loading recommendations...</div>;
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
@@ -87,6 +103,26 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <main className="container mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-6">Wikipedia Content</h1>
+        
+        <div className="mb-6">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border p-2 w-full max-w-md"
+            placeholder="Search Wikipedia..."
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {wikiContent.map((item) => (
+            <ContentCard key={item.pageid} content={item} />
+          ))}
+        </div>
+      </main>
     </div>
   );
 } 

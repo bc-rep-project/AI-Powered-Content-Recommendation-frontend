@@ -106,4 +106,18 @@ Automatically deployed to Vercel on main branch updates.
 - [Next.js Documentation](https://nextjs.org/docs)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [Supabase Documentation](https://supabase.io/docs) 
+- [Supabase Documentation](https://supabase.io/docs)
+
+## Wikipedia Integration
+
+The app integrates with Wikipedia's API to provide supplemental content. Features include:
+
+- Real-time search of Wikipedia articles
+- Cached results for better performance
+- Clean presentation of article snippets
+- Direct links to full articles
+
+To use the Wikipedia integration:
+1. Enter a search term in the Wikipedia search field
+2. Browse results in the grid below
+3. Click "Read more" to view full articles
