@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTheme } from '@/contexts/ThemeContext';
 import { usePathname } from 'next/navigation';
 import { FiSun, FiMoon, FiMenu, FiX, FiUser, FiLogOut, FiBell } from 'react-icons/fi';
+import LogoutButton from './LogoutButton';
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
@@ -107,16 +108,7 @@ export default function Navbar() {
                     >
                       Settings
                     </a>
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        // Add logout logic here
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      role="menuitem"
-                    >
-                      Sign out
-                    </button>
+                    <LogoutButton />
                   </div>
                 </div>
               )}

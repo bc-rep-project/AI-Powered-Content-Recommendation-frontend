@@ -149,5 +149,10 @@ export const userApi = {
     updatePreferences: async (preferences: any) => {
         const response = await api.put('/users/preferences', preferences);
         return response.data;
-    }
+    },
+    
+    logout: async () => {
+        await api.post('/auth/logout');
+        localStorage.removeItem('auth_token');
+    },
 }; 
