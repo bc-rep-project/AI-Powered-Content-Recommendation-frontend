@@ -125,10 +125,11 @@ export const contentApi = {
 // User-related API calls
 export const userApi = {
     login: async (email: string, password: string) => {
-        const response = await api.post('/auth/token', 
-            `username=${email}&password=${password}`,
-            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}
-        );
+        const response = await api.post('/auth/token', {
+            username: email,
+            password: password,
+            grant_type: 'password'
+        });
         return response.data;
     },
     
