@@ -18,7 +18,7 @@ export default function RegisterPage() {
     const userData = {
       email: formData.get('email'),
       password: formData.get('password'),
-      full_name: formData.get('full_name')
+      username: formData.get('username')
     };
 
     try {
@@ -26,7 +26,15 @@ export default function RegisterPage() {
       // Token is automatically saved by the register function
       router.push('/dashboard'); // or wherever you want to redirect after registration
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
+      let errorMessage = 'Registration failed';
+      if (err.response?.data?.detail) {
+        if (typeof err.response.data.detail === 'string') {
+          errorMessage = err.response.data.detail;
+        } else if (err.response.data.detail[0]?.msg) {
+          errorMessage = err.response.data.detail[0].msg;
+        }
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -48,16 +56,16 @@ export default function RegisterPage() {
           )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="full_name" className="sr-only">
-                Full Name
+              <label htmlFor="username" className="sr-only">
+                Username
               </label>
               <input
-                id="full_name"
-                name="full_name"
+                id="username"
+                name="username"
                 type="text"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                placeholder="Full Name"
+                placeholder="Username"
               />
             </div>
             <div>
