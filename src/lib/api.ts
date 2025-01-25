@@ -5,15 +5,12 @@ const API_PREFIX = '/api/v1';
 
 export const api = axios.create({
     baseURL: `${API_URL}${API_PREFIX}`,
-    headers: {
-        'Content-Type': 'application/json',
-    },
     withCredentials: true,
-    timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-    }
+        'Access-Control-Allow-Origin': '*'
+    },
+    timeout: 10000
 });
 
 // Add request interceptor for authentication
