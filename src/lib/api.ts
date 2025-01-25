@@ -127,8 +127,7 @@ export const userApi = {
     login: async (email: string, password: string) => {
         const response = await api.post('/auth/token', {
             username: email,
-            password: password,
-            grant_type: 'password'
+            password: password
         });
         return response.data;
     },
