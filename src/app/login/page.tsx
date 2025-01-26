@@ -20,7 +20,7 @@ export default function LoginPage() {
     const formData = new FormData(event.currentTarget);
     try {
         const { access_token } = await userApi.login(
-            formData.get('email') as string,
+            formData.get('username'),
             formData.get('password') as string
         );
         
