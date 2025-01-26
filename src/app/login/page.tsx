@@ -19,15 +19,28 @@ export default function LoginPage() {
     
     const formData = new FormData(event.currentTarget);
     try {
-        const { access_token } = await userApi.login(
-            formData.get('username'),
-            formData.get('password') as string
-        );
+        // Send as URL-encoded form data
+        const response = await fetch('/api/v1/auth/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                username: formData.get('email') as string,
+                password: formData.get('password') as string
+            })
+        });
         
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Login failed');
+        }
+        
+        const { access_token } = await response.json();
         localStorage.setItem('auth_token', access_token);
         router.push('/dashboard');
     } catch (err: any) {
-        setError(err.response?.data?.detail || 'Login failed');
+        setError(err.message);
     } finally {
         setIsLoading(false);
     }
@@ -49,12 +62,12 @@ export default function LoginPage() {
             )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
+              <label htmlFor="username" className="sr-only">
                 Email address
               </label>
                 <input
-                  id="email"
-                  name="email"
+                  id="username"
+                  name="username"
                   type="email"
                   required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
