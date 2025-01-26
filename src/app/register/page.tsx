@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { userApi } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -108,6 +109,12 @@ export default function RegisterPage() {
             </button>
           </div>
         </form>
+        <div className="text-center text-sm mt-4">
+          <span className="text-gray-600">Already have an account? </span>
+          <Link href="/login" className="font-medium text-primary-600 hover:text-primary-500">
+            Sign in here
+          </Link>
+        </div>
       </div>
     </div>
   );
